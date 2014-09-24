@@ -19,14 +19,11 @@ OS:=$(shell uname -s)
 ### Required libraries. You must install these prior to building.
 
 # Set this to the root directory of Boost (should have a subdirectory named boost):
-BOOST=/home/hieu/workspace/boost/boost_1_55_0.gcc
+BOOST=/home/paulb/mylibs/boost-1.55.0
 #BOOST=/usr
 #BOOST=/opt/local
 # Where to find Boost header files
 BOOST_INC=$(BOOST)/include
-
-# Set this to the root directory of Eigen (should have a subdirectory named Eigen):
-EIGEN=/home/hieu/workspace/eigen-3
 
 ### Optional libraries.
 
@@ -104,7 +101,7 @@ ifdef STATIC
   LDFLAGS+=-static
 endif
 
-ALL_CFLAGS=$(OMP_CFLAGS) $(MKL_CFLAGS) $(BOOST_CFLAGS) -I$(TCLAP) -I$(EIGEN) $(CFLAGS)
+ALL_CFLAGS=$(OMP_CFLAGS) $(MKL_CFLAGS) $(BOOST_CFLAGS) -I$(TCLAP) $(CFLAGS)
 ALL_LDFLAGS=$(OMP_LDFLAGS) $(MKL_LDFLAGS) $(BOOST_LDFLAGS) $(LDFLAGS)
 ALL_LDLIBS=$(MKL_LDLIBS) $(BOOST_LDLIBS)
 
