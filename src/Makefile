@@ -28,7 +28,7 @@ BOOST_INC=$(BOOST)/include
 ### Optional libraries.
 
 # To disable multithreading, comment out the line below:
-#OMP=1
+OMP=1
 
 # To use the MKL library, uncomment the line below and set it to the MKL root:
 #MKL=/usr/usc/intel/12.1.1/mkl
