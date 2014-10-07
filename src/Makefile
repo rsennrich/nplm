@@ -6,7 +6,7 @@ CXX=g++
 
 # Compiler options. Note that -DEIGEN_NO_DEBUG is essential for good performance!
 #CFLAGS=-g
-CFLAGS=-O3 -DEIGEN_NO_DEBUG -DNDEBUG 
+CFLAGS=-O3 -DEIGEN_NO_DEBUG
 
 # Architecture. Set to x86_64 or i686 to override.
 ARCH:=$(shell uname -m)
