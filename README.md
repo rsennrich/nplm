@@ -6,6 +6,10 @@ Before compiling, you must have the following:
 * [GNU make](http://www.gnu.org/software/make/)
 * [Boost](http://www.boost.org) 1.47.0 or later
 
+Decoders (only needed if you want to use NPLM in that particular SMT system):
+
+* [Moses](http://www.statmt.org/moses/)
+
 Optional:
 
 * [Intel MKL](http://software.intel.com/en-us/intel-mkl) 11.x (recommended for better performance)
@@ -37,7 +41,7 @@ First tokenize, lowercase, etc. your training data using your favourite tools. A
                              --ngram_size 5 \
                              --vocab_size <vocab_size> \
                              --write-words-file training.vocab
-                             
+
 Set `vocab-size` to a value lower than the true vocabulary size, so the model can learn a representation for unknown words (marked with the `<unk>` token).
 
 This script does the following:
@@ -45,7 +49,6 @@ This script does the following:
   words to `<unk>`.
 - Adds start `<s>` and stop `</s>` symbols.
 - Converts both the training data and the validation data to numberized n-grams (one per line).
-
 
 ### Train a language model
 
@@ -76,7 +79,7 @@ Notes:
   If you set `--normalization 1`, the trainer will try to learn the
   normalization factors, and you should accordingly turn on
   normalization when using the resulting model. The default initial
-  value --normalization_init 0 should be fine; you can try setting it
+  value `--normalization_init 0` should be fine; you can try setting it
   a little higher, but not lower.
 
 - Validation. The trainer computes the log-likelihood of a validation
@@ -84,9 +87,15 @@ Notes:
   this to decide when to stop training, and the trainer also uses it
   to throttle the learning rate. This computation always uses exact
   normalization and is therefore much slower, per instance, than
-  training. Therefore, you should not use a large test corpus for 
+  training. Therefore, you should not use a large test corpus for
   validation (e.g. ~50k tokens).
 
+### Decoding with Moses
+
+A [feature function](https://github.com/moses-smt/mosesdecoder/tree/master/moses/LM) for the Moses decoder has already been pushed in the [Moses
+repository](https://github.com/moses-smt/mosesdecoder). To use it, you must first compile Moses as follows:
+
+    ./bjam -j <num_threads> --with-nplm=</absolute/path/to/nplm>
 
 ### Miscellaneous
 
@@ -116,9 +125,9 @@ nplm.py is a pure Python module for reading and using language models
 created by trainNeuralNetwork. See testNeuralLM.py for example usage.
 
 In src/python are Python bindings (using Cython) for the C++ code. To
-build them, run 'make python/nplm.so'.
+build them, run `make python/nplm.so`.
 
-#### Decoding
+#### Writing your own deocder feature function
 
 To use the language model in a decoder, include neuralLM.h and link
 against neuralLM.a. This provides a class nplm::neuralLM, with the
