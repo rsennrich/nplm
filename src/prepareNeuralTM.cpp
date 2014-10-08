@@ -9,6 +9,7 @@ using namespace std;
 using namespace TCLAP;
 
 #include "neuralLM.h" // for vocabulary
+#include "preprocess.h"
 #include "util.h"
 
 using namespace boost;
@@ -19,8 +20,8 @@ void writeNgrams(const vector<vector<string> > &input_data, const vector<vector<
     ofstream file(filename.c_str());
     if (!file)
     {
-	cerr << "error: could not open " << filename << endl;
-	exit(1);
+  cerr << "error: could not open " << filename << endl;
+  exit(1);
     }
 
     // check that input and output data have the same number of sentences
@@ -40,14 +41,14 @@ void writeNgrams(const vector<vector<string> > &input_data, const vector<vector<
                 input_nums.push_back(input_vocab.lookup_word(input_data[i][j]));
             }
             makeNgrams(input_nums, input_ngrams, ngram_size-1);
-            
+
             vector<vector<int> > output_ngrams;
             vector<int> output_nums;
             for (int j=0; j<output_data[i].size(); j++) {
                 output_nums.push_back(output_vocab.lookup_word(output_data[i][j]));
             }
             makeNgrams(output_nums, output_ngrams, 1);
-    
+
             // print out cross product of input and output ngrams
             for (int j=0; j < input_ngrams.size(); j++) {
                 for (int k=0; k < output_ngrams.size(); k++) {
@@ -83,7 +84,7 @@ void writeNgrams(const vector<vector<string> > &input_data, const vector<vector<
                 }
             }
             makeNgrams(input_words, input_ngrams, ngram_size-1);
-            
+
             vector<vector<string> > output_ngrams;
             vector<string> output_words;
             for (int j=0; j<output_data[i].size(); j++) {
@@ -98,7 +99,7 @@ void writeNgrams(const vector<vector<string> > &input_data, const vector<vector<
                 }
             }
             makeNgrams(output_words, output_ngrams, 1);
-    
+
             // print out cross product of input and output ngrams
             for (int j=0; j < input_ngrams.size(); j++) {
                 for (int k=0; k < output_ngrams.size(); k++) {
@@ -118,7 +119,7 @@ void writeNgrams(const vector<vector<string> > &input_data, const vector<vector<
     }
     file.close();
 }
-    
+
 int main(int argc, char *argv[])
 {
     int ngram_size, input_vocab_size, output_vocab_size, validation_size;
@@ -127,10 +128,10 @@ int main(int argc, char *argv[])
 
     try
     {
-	CmdLine cmd("Prepares training data for training a language model.", ' ', "0.1");
+  CmdLine cmd("Prepares training data for training a language model.", ' ', "0.1");
 
-	// The options are printed in reverse order
-    
+  // The options are printed in reverse order
+
     ValueArg<bool> arg_ngramize("", "ngramize", "If true, convert lines to ngrams. Default: true.", false, true, "bool", cmd);
     ValueArg<bool> arg_numberize("", "numberize", "If true, convert words to numbers. Default: true.", false, true, "bool", cmd);
     ValueArg<bool> arg_add_start_stop("", "add_start_stop", "If true, prepend (ngram_size-1) start symbols and postpend 1 stop symbol. Default: true.", false, true, "bool", cmd);
@@ -139,37 +140,37 @@ int main(int argc, char *argv[])
     ValueArg<string> arg_input_words_file("", "input_words_file", "File specifying words that should be included in vocabulary; all other words will be replaced by <unk>.", false, "", "string", cmd);
     ValueArg<string> arg_output_words_file("", "output_words_file", "File specifying words that should be included in vocabulary; all other words will be replaced by <unk>.", false, "", "string", cmd);
     ValueArg<int> arg_ngram_size("", "ngram_size", "Size of n-grams.", true, -1, "int", cmd);
-	ValueArg<string> arg_write_input_words_file("", "write_input_words_file", "Output vocabulary.", false, "", "string", cmd);
-	ValueArg<string> arg_write_output_words_file("", "write_output_words_file", "Output vocabulary.", false, "", "string", cmd);
+  ValueArg<string> arg_write_input_words_file("", "write_input_words_file", "Output vocabulary.", false, "", "string", cmd);
+  ValueArg<string> arg_write_output_words_file("", "write_output_words_file", "Output vocabulary.", false, "", "string", cmd);
     ValueArg<int> arg_validation_size("", "validation_size", "How many lines from training data to hold out for validation. Default: 0.", false, 0, "int", cmd);
-	ValueArg<string> arg_validation_file("", "validation_file", "Output validation data (numberized n-grams).", false, "", "string", cmd);
-	ValueArg<string> arg_input_validation_text("", "input_validation_text", "Input validation data (tokenized). Overrides --validation_size. Default: none.", false, "", "string", cmd);
-	ValueArg<string> arg_output_validation_text("", "output_validation_text", "Input validation data (tokenized). Overrides --validation_size. Default: none.", false, "", "string", cmd);
-	ValueArg<string> arg_train_file("", "train_file", "Output training data (numberized n-grams).", false, "", "string", cmd);
+  ValueArg<string> arg_validation_file("", "validation_file", "Output validation data (numberized n-grams).", false, "", "string", cmd);
+  ValueArg<string> arg_input_validation_text("", "input_validation_text", "Input validation data (tokenized). Overrides --validation_size. Default: none.", false, "", "string", cmd);
+  ValueArg<string> arg_output_validation_text("", "output_validation_text", "Input validation data (tokenized). Overrides --validation_size. Default: none.", false, "", "string", cmd);
+  ValueArg<string> arg_train_file("", "train_file", "Output training data (numberized n-grams).", false, "", "string", cmd);
     ValueArg<string> arg_input_train_text("", "input_train_text", "Input training data (tokenized).", true, "", "string", cmd);
     ValueArg<string> arg_output_train_text("", "output_train_text", "Input training data (tokenized).", true, "", "string", cmd);
 
-	cmd.parse(argc, argv);
+  cmd.parse(argc, argv);
 
-	input_train_text = arg_input_train_text.getValue();
-	output_train_text = arg_output_train_text.getValue();
-	train_file = arg_train_file.getValue();
-	validation_file = arg_validation_file.getValue();
-	input_validation_text = arg_input_validation_text.getValue();
-	output_validation_text = arg_output_validation_text.getValue();
-	input_validation_text = arg_input_validation_text.getValue();
-	output_validation_text = arg_output_validation_text.getValue();
-	validation_size = arg_validation_size.getValue();
-	write_input_words_file = arg_write_input_words_file.getValue();
-	write_output_words_file = arg_write_output_words_file.getValue();
-	ngram_size = arg_ngram_size.getValue();
-	input_vocab_size = arg_input_vocab_size.getValue();
-	output_vocab_size = arg_output_vocab_size.getValue();
-	input_words_file = arg_input_words_file.getValue();
-	output_words_file = arg_output_words_file.getValue();
-	numberize = arg_numberize.getValue();
-	ngramize = arg_ngramize.getValue();
-	add_start_stop = arg_add_start_stop.getValue();
+  input_train_text = arg_input_train_text.getValue();
+  output_train_text = arg_output_train_text.getValue();
+  train_file = arg_train_file.getValue();
+  validation_file = arg_validation_file.getValue();
+  input_validation_text = arg_input_validation_text.getValue();
+  output_validation_text = arg_output_validation_text.getValue();
+  input_validation_text = arg_input_validation_text.getValue();
+  output_validation_text = arg_output_validation_text.getValue();
+  validation_size = arg_validation_size.getValue();
+  write_input_words_file = arg_write_input_words_file.getValue();
+  write_output_words_file = arg_write_output_words_file.getValue();
+  ngram_size = arg_ngram_size.getValue();
+  input_vocab_size = arg_input_vocab_size.getValue();
+  output_vocab_size = arg_output_vocab_size.getValue();
+  input_words_file = arg_input_words_file.getValue();
+  output_words_file = arg_output_words_file.getValue();
+  numberize = arg_numberize.getValue();
+  ngramize = arg_ngramize.getValue();
+  add_start_stop = arg_add_start_stop.getValue();
 
     // check command line arguments
 
@@ -197,25 +198,25 @@ int main(int argc, char *argv[])
 
     cerr << "Command line: " << endl;
     cerr << boost::algorithm::join(vector<string>(argv, argv+argc), " ") << endl;
-	
-	const string sep(" Value: ");
-	cerr << arg_input_train_text.getDescription() << sep << arg_input_train_text.getValue() << endl;
-	cerr << arg_output_train_text.getDescription() << sep << arg_output_train_text.getValue() << endl;
-	cerr << arg_train_file.getDescription() << sep << arg_train_file.getValue() << endl;
-	cerr << arg_input_validation_text.getDescription() << sep << arg_input_validation_text.getValue() << endl;
-	cerr << arg_output_validation_text.getDescription() << sep << arg_output_validation_text.getValue() << endl;
-	cerr << arg_validation_file.getDescription() << sep << arg_validation_file.getValue() << endl;
-	cerr << arg_validation_size.getDescription() << sep << arg_validation_size.getValue() << endl;
-	cerr << arg_write_input_words_file.getDescription() << sep << arg_write_input_words_file.getValue() << endl;
-	cerr << arg_write_output_words_file.getDescription() << sep << arg_write_output_words_file.getValue() << endl;
-	cerr << arg_ngram_size.getDescription() << sep << arg_ngram_size.getValue() << endl;
-	cerr << arg_input_vocab_size.getDescription() << sep << arg_input_vocab_size.getValue() << endl;
-	cerr << arg_output_vocab_size.getDescription() << sep << arg_output_vocab_size.getValue() << endl;
-	cerr << arg_input_words_file.getDescription() << sep << arg_input_words_file.getValue() << endl;
-	cerr << arg_output_words_file.getDescription() << sep << arg_output_words_file.getValue() << endl;
-	cerr << arg_numberize.getDescription() << sep << arg_numberize.getValue() << endl;
-	cerr << arg_ngramize.getDescription() << sep << arg_ngramize.getValue() << endl;
-	cerr << arg_add_start_stop.getDescription() << sep << arg_add_start_stop.getValue() << endl;
+
+  const string sep(" Value: ");
+  cerr << arg_input_train_text.getDescription() << sep << arg_input_train_text.getValue() << endl;
+  cerr << arg_output_train_text.getDescription() << sep << arg_output_train_text.getValue() << endl;
+  cerr << arg_train_file.getDescription() << sep << arg_train_file.getValue() << endl;
+  cerr << arg_input_validation_text.getDescription() << sep << arg_input_validation_text.getValue() << endl;
+  cerr << arg_output_validation_text.getDescription() << sep << arg_output_validation_text.getValue() << endl;
+  cerr << arg_validation_file.getDescription() << sep << arg_validation_file.getValue() << endl;
+  cerr << arg_validation_size.getDescription() << sep << arg_validation_size.getValue() << endl;
+  cerr << arg_write_input_words_file.getDescription() << sep << arg_write_input_words_file.getValue() << endl;
+  cerr << arg_write_output_words_file.getDescription() << sep << arg_write_output_words_file.getValue() << endl;
+  cerr << arg_ngram_size.getDescription() << sep << arg_ngram_size.getValue() << endl;
+  cerr << arg_input_vocab_size.getDescription() << sep << arg_input_vocab_size.getValue() << endl;
+  cerr << arg_output_vocab_size.getDescription() << sep << arg_output_vocab_size.getValue() << endl;
+  cerr << arg_input_words_file.getDescription() << sep << arg_input_words_file.getValue() << endl;
+  cerr << arg_output_words_file.getDescription() << sep << arg_output_words_file.getValue() << endl;
+  cerr << arg_numberize.getDescription() << sep << arg_numberize.getValue() << endl;
+  cerr << arg_ngramize.getDescription() << sep << arg_ngramize.getValue() << endl;
+  cerr << arg_add_start_stop.getDescription() << sep << arg_add_start_stop.getValue() << endl;
     }
     catch (TCLAP::ArgException &e)
     {
@@ -228,32 +229,32 @@ int main(int argc, char *argv[])
     readSentFile(input_train_text, input_train_data);
     if (add_start_stop) {
       for (int i=0; i<input_train_data.size(); i++) {
-	vector<string> input_train_data_start_stop;
-	addStartStop<string>(input_train_data[i], input_train_data_start_stop, ngram_size, "<s>", "</s>");
-	input_train_data[i]=input_train_data_start_stop;
+  vector<string> input_train_data_start_stop;
+  addStartStop<string>(input_train_data[i], input_train_data_start_stop, ngram_size, "<s>", "</s>");
+  input_train_data[i]=input_train_data_start_stop;
       }
     }
-    
+
     vector<vector<string> > input_validation_data;
     if (input_validation_text != "") {
         readSentFile(input_validation_text, input_validation_data);
         if (add_start_stop) {
-	  for (int i=0; i<input_validation_data.size(); i++) {
-	    vector<string> input_validation_data_start_stop;
-	    addStartStop<string>(input_validation_data[i], input_validation_data_start_stop, ngram_size, "<s>", "</s>");
-	    input_validation_data[i]=input_validation_data_start_stop;
-	  }
+    for (int i=0; i<input_validation_data.size(); i++) {
+      vector<string> input_validation_data_start_stop;
+      addStartStop<string>(input_validation_data[i], input_validation_data_start_stop, ngram_size, "<s>", "</s>");
+      input_validation_data[i]=input_validation_data_start_stop;
+    }
         }
     }
     else if (validation_size > 0)
     {
         if (validation_size > input_train_data.size())
-	{
-	    cerr << "error: requested input_validation size is greater than training data size" << endl;
-	    exit(1);
-	}
-	input_validation_data.insert(input_validation_data.end(), input_train_data.end()-validation_size, input_train_data.end());
-	input_train_data.resize(input_train_data.size() - validation_size);
+  {
+      cerr << "error: requested input_validation size is greater than training data size" << endl;
+      exit(1);
+  }
+  input_validation_data.insert(input_validation_data.end(), input_train_data.end()-validation_size, input_train_data.end());
+  input_train_data.resize(input_train_data.size() - validation_size);
     }
 
     // Read in output training data and validation data
@@ -261,32 +262,32 @@ int main(int argc, char *argv[])
     readSentFile(output_train_text, output_train_data);
     if (add_start_stop) {
       for (int i=0; i<output_train_data.size(); i++) {
-	vector<string> output_train_data_start_stop;
-	addStartStop<string>(output_train_data[i], output_train_data_start_stop, 1, "<s>", "</s>");
-	output_train_data[i]=output_train_data_start_stop;
+  vector<string> output_train_data_start_stop;
+  addStartStop<string>(output_train_data[i], output_train_data_start_stop, 1, "<s>", "</s>");
+  output_train_data[i]=output_train_data_start_stop;
       }
     }
-    
+
     vector<vector<string> > output_validation_data;
     if (output_validation_text != "") {
         readSentFile(output_validation_text, output_validation_data);
         if (add_start_stop) {
-	  for (int i=0; i<output_validation_data.size(); i++) {
-	    vector<string> output_validation_data_start_stop;
-	    addStartStop<string>(output_validation_data[i], output_validation_data_start_stop, 1, "<s>", "</s>");
-	    output_validation_data[i]=output_validation_data_start_stop;
-	  }
+    for (int i=0; i<output_validation_data.size(); i++) {
+      vector<string> output_validation_data_start_stop;
+      addStartStop<string>(output_validation_data[i], output_validation_data_start_stop, 1, "<s>", "</s>");
+      output_validation_data[i]=output_validation_data_start_stop;
+    }
         }
     }
     else if (validation_size > 0)
     {
         if (validation_size > output_train_data.size())
-	{
-	    cerr << "error: requested output_validation size is greater than training data size" << endl;
-	    exit(1);
-	}
-	output_validation_data.insert(output_validation_data.end(), output_train_data.end()-validation_size, output_train_data.end());
-	output_train_data.resize(output_train_data.size() - validation_size);
+  {
+      cerr << "error: requested output_validation size is greater than training data size" << endl;
+      exit(1);
+  }
+  output_validation_data.insert(output_validation_data.end(), output_train_data.end()-validation_size, output_train_data.end());
+  output_train_data.resize(output_train_data.size() - validation_size);
     }
 
     // Construct input vocabulary
@@ -319,7 +320,7 @@ int main(int argc, char *argv[])
         unordered_map<string,int> count;
         for (int i=0; i<input_train_data.size(); i++) {
             for (int j=0; j<input_train_data[i].size(); j++) {
-                count[input_train_data[i][j]] += 1; 
+                count[input_train_data[i][j]] += 1;
             }
         }
 
@@ -359,7 +360,7 @@ int main(int argc, char *argv[])
         unordered_map<string,int> count;
         for (int i=0; i<output_train_data.size(); i++) {
             for (int j=0; j<output_train_data[i].size(); j++) {
-                count[output_train_data[i][j]] += 1; 
+                count[output_train_data[i][j]] += 1;
             }
         }
 

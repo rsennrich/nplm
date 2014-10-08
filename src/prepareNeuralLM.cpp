@@ -6,37 +6,13 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include "neuralLM.h"
+#include "preprocess.h"
 #include "util.h"
 
 using namespace std;
 using namespace TCLAP;
 using namespace boost;
 using namespace nplm;
-
-void writeNgrams(
-    const vector<vector<string> >& data, int ngram_size,
-    const vocabulary &vocab, bool numberize, bool add_start_stop,
-    bool ngramize, const string &filename) {
-  ofstream file(filename.c_str());
-  if (!file) {
-    cerr << "error: could not open " << filename << endl;
-    exit(1);
-  }
-
-  vector<vector<int> > ngrams;
-  for (int i = 0; i < data.size(); i++) {
-    preprocessWords(data[i], ngrams, ngram_size, vocab, numberize, add_start_stop, ngramize);
-
-    // write out n-grams
-    for (int j = 0; j < ngrams.size(); j++) {
-      for (int k = 0; k < ngram_size; k++) {
-        file << ngrams[j][k] << " ";
-      }
-      file << endl;
-    }
-  }
-  file.close();
-}
 
 int main(int argc, char *argv[]) {
   int ngram_size, vocab_size, validation_size;

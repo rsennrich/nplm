@@ -7,9 +7,9 @@
 #include "../3rdparty/Eigen/Core"
 #include "../3rdparty/Eigen/Dense"
 
-#include "param.h"
-
 #include "neuralLM.h"
+#include "param.h"
+#include "preprocess.h"
 
 using namespace std;
 using namespace boost;
@@ -18,7 +18,7 @@ using namespace Eigen;
 
 using namespace nplm;
 
-int main (int argc, char *argv[]) 
+int main (int argc, char *argv[])
 {
     param myParam;
     bool normalization;
@@ -56,7 +56,7 @@ int main (int argc, char *argv[])
 
       cerr << "Command line: " << endl;
       cerr << boost::algorithm::join(vector<string>(argv, argv+argc), " ") << endl;
-      
+
       const string sep(" Value: ");
       cerr << arg_test_file.getDescription() << sep << arg_test_file.getValue() << endl;
       cerr << arg_model_file.getDescription() << sep << arg_model_file.getValue() << endl;
@@ -94,8 +94,8 @@ int main (int argc, char *argv[])
     ifstream test_file(myParam.test_file.c_str());
     if (!test_file)
     {
-	cerr << "error: could not open " << myParam.test_file << endl;
-	exit(1);
+  cerr << "error: could not open " << myParam.test_file << endl;
+  exit(1);
     }
     string line;
 
@@ -107,11 +107,11 @@ int main (int argc, char *argv[])
         vector<string> words;
         splitBySpace(line, words);
 
-	vector<vector<int> > sent_ngrams;
-	preprocessWords(words, sent_ngrams, ngram_size, lm.get_vocabulary(), numberize, add_start_stop, ngramize);
+  vector<vector<int> > sent_ngrams;
+  preprocessWords(words, sent_ngrams, ngram_size, lm.get_vocabulary(), numberize, add_start_stop, ngramize);
 
-	start.push_back(ngrams.size());
-	copy(sent_ngrams.begin(), sent_ngrams.end(), back_inserter(ngrams));
+  start.push_back(ngrams.size());
+  copy(sent_ngrams.begin(), sent_ngrams.end(), back_inserter(ngrams));
     }
     start.push_back(ngrams.size());
 
@@ -119,39 +119,39 @@ int main (int argc, char *argv[])
     {
         // Score one n-gram at a time. This is how the LM would be queried from a decoder.
         for (int sent_id=0; sent_id<start.size()-1; sent_id++)
-	{	  
-	    double sent_log_prob = 0.0;
-	    for (int j=start[sent_id]; j<start[sent_id+1]; j++) 
-	        sent_log_prob += lm.lookup_ngram(ngrams[j]);
-	    cout << sent_log_prob << endl;
-	    log_likelihood += sent_log_prob;
-	}
+  {
+      double sent_log_prob = 0.0;
+      for (int j=start[sent_id]; j<start[sent_id+1]; j++)
+          sent_log_prob += lm.lookup_ngram(ngrams[j]);
+      cout << sent_log_prob << endl;
+      log_likelihood += sent_log_prob;
+  }
     }
     else
     {
-	// Score a whole minibatch at a time.
+  // Score a whole minibatch at a time.
         Matrix<double,1,Dynamic> log_probs(ngrams.size());
 
         Matrix<int,Dynamic,Dynamic> minibatch(ngram_size, minibatch_size);
-	minibatch.setZero();
+  minibatch.setZero();
         for (int test_id = 0; test_id < ngrams.size(); test_id += minibatch_size)
-	{
-	    int current_minibatch_size = minibatch_size<ngrams.size()-test_id ? minibatch_size : ngrams.size()-test_id;
-	    for (int j=0; j<current_minibatch_size; j++)
-	        minibatch.col(j) = Map< Matrix<int,Dynamic,1> > (ngrams[test_id+j].data(), ngram_size);
-	    lm.lookup_ngram(minibatch.leftCols(current_minibatch_size), log_probs.middleCols(test_id, current_minibatch_size));
-	}
+  {
+      int current_minibatch_size = minibatch_size<ngrams.size()-test_id ? minibatch_size : ngrams.size()-test_id;
+      for (int j=0; j<current_minibatch_size; j++)
+          minibatch.col(j) = Map< Matrix<int,Dynamic,1> > (ngrams[test_id+j].data(), ngram_size);
+      lm.lookup_ngram(minibatch.leftCols(current_minibatch_size), log_probs.middleCols(test_id, current_minibatch_size));
+  }
 
-	for (int sent_id=0; sent_id<start.size()-1; sent_id++)
-	{
-	    double sent_log_prob = 0.0;
-	    for (int j=start[sent_id]; j<start[sent_id+1]; j++)
-	        sent_log_prob += log_probs[j];
-	    cout << sent_log_prob << endl;
-	    log_likelihood += sent_log_prob;
-	}
+  for (int sent_id=0; sent_id<start.size()-1; sent_id++)
+  {
+      double sent_log_prob = 0.0;
+      for (int j=start[sent_id]; j<start[sent_id+1]; j++)
+          sent_log_prob += log_probs[j];
+      cout << sent_log_prob << endl;
+      log_likelihood += sent_log_prob;
+  }
     }
-    
+
     cerr << "Test log10-likelihood: " << log_likelihood << endl;
     #ifdef USE_CHRONO
     cerr << "Propagation times:";
@@ -159,5 +159,5 @@ int main (int argc, char *argv[])
       cerr << " " << timer.get(i);
     cerr << endl;
     #endif
-    
+
 }
