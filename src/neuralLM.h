@@ -24,6 +24,8 @@
 #include <boost/thread/shared_mutex.hpp>
 #endif
 
+using namespace std;
+
 namespace nplm {
 
 class neuralLMShared {
@@ -35,14 +37,14 @@ class neuralLMShared {
   vocabulary input_vocab, output_vocab;
   model nn;
 
-  std::size_t cache_size;
+  size_t cache_size;
   Eigen::Matrix<int, Dynamic, Dynamic> cache_keys;
-  std::vector<double> cache_values;
+  vector<double> cache_values;
   int cache_lookups, cache_hits;
 
-  explicit neuralLMShared(const std::string &filename, bool premultiply = false)
+  explicit neuralLMShared(const string &filename, bool premultiply = false)
      : cache_size(0) {
-    std::vector<std::string> input_words, output_words;
+    vector<string> input_words, output_words;
     nn.read(filename, input_words, output_words);
     input_vocab = vocabulary(input_words);
     output_vocab = vocabulary(output_words);
@@ -58,7 +60,7 @@ class neuralLMShared {
 
   template <typename Derived>
   double lookup_cache(const Eigen::MatrixBase<Derived> &ngram) {
-    std::size_t hash;
+    size_t hash;
     if (cache_size) {
       // First look in cache
       hash = Eigen::hash_value(ngram) % cache_size; // defined in util.h
@@ -77,7 +79,7 @@ class neuralLMShared {
 
   template <typename Derived>
   void store_cache(const Eigen::MatrixBase<Derived> &ngram, double log_prob) {
-    std::size_t hash;
+    size_t hash;
     if (cache_size) {
       hash = Eigen::hash_value(ngram) % cache_size;
 #ifdef WITH_THREADS // block others from reading cache
@@ -89,7 +91,7 @@ class neuralLMShared {
     }
   }
 
-  void set_cache(std::size_t cache_size) {
+  void set_cache(size_t cache_size) {
     this->cache_size = cache_size;
     cache_keys.resize(nn.ngram_size, cache_size);
     cache_keys.fill(-1); // clears cache
@@ -116,7 +118,7 @@ class neuralLM {
   int start, null;
 
  public:
-  neuralLM(const std::string &filename, bool premultiply = false)
+  neuralLM(const string &filename, bool premultiply = false)
       : shared(new neuralLMShared(filename, premultiply)),
         ngram_size(shared->nn.ngram_size),
         normalization(false),
@@ -150,7 +152,7 @@ class neuralLM {
   }
 
   void set_log_base(double value) {
-    weight = 1./std::log(value);
+    weight = 1./log(value);
   }
 
   void set_map_digits(char value) {
@@ -166,42 +168,38 @@ class neuralLM {
     return shared->input_vocab;
   }
 
-  int lookup_input_word(const std::string &word) const {
-    if (map_digits) {
-      for (int i = 0; i < word.length(); i++) {
-        if (isdigit(word[i])) {
-          std::string mapped_word(word);
-          for (; i < word.length(); i++) {
-            if (isdigit(word[i])) {
-              mapped_word[i] = map_digits;
-            }
-          }
-          return shared->input_vocab.lookup_word(mapped_word);
-        }
+  int lookup_input_word(const string &word) const {
+    if (!map_digits) {
+      return shared->input_vocab.lookup_word(word);
+    }
+
+    string mapped_word(word);
+    for (int i = 0; i < word.length(); i++) {
+      if (isdigit(word[i])) {
+        mapped_word[i] = map_digits;
       }
     }
-    return shared->input_vocab.lookup_word(word);
+
+    return shared->input_vocab.lookup_word(mapped_word);
   }
 
-  int lookup_word(const std::string &word) const {
+  int lookup_word(const string &word) const {
     return lookup_input_word(word);
   }
 
-  int lookup_output_word(const std::string &word) const {
-    if (map_digits) {
-      for (int i=0; i<word.length(); i++) {
-        if (isdigit(word[i])) {
-          std::string mapped_word(word);
-          for (; i<word.length(); i++) {
-            if (isdigit(word[i])) {
-              mapped_word[i] = map_digits;
-            }
-          }
-          return shared->output_vocab.lookup_word(mapped_word);
-        }
+  int lookup_output_word(const string &word) const {
+    if (!map_digits) {
+      return shared->output_vocab.lookup_word(word);
+    }
+
+    string mapped_wrod(word);
+    for (int i = 0; i < word.length(); ++i) {
+      if (isdigit(word[i])) {
+        mapped_word[i] = map_digits;
       }
     }
-    return shared->output_vocab.lookup_word(word);
+
+    return shared->output_vocab.lookup_word(mapped_word);
   }
 
   Eigen::Matrix<int,Eigen::Dynamic,1> &staging_ngram() {
@@ -228,10 +226,10 @@ class neuralLM {
     omp_set_num_threads(1);
     int save_eigen_threads = Eigen::nbThreads();
     Eigen::setNbThreads(1);
-    #ifdef __INTEL_MKL__
+#ifdef __INTEL_MKL__
     int save_mkl_threads = mkl_get_max_threads();
     mkl_set_num_threads(1);
-    #endif
+#endif
 
     prop.fProp(ngram.col(0));
 
@@ -245,7 +243,8 @@ class neuralLM {
       double logz = logsum(scores.col(0));
       log_prob = weight * (scores(output, 0) - logz);
     } else {
-      log_prob = weight * prop.output_layer_node.param->fProp(prop.second_hidden_activation_node.fProp_matrix, output, 0);
+      log_prob = weight * prop.output_layer_node.param->fProp(
+          prop.second_hidden_activation_node.fProp_matrix, output, 0);
     }
     stop_timer(3);
 
@@ -300,21 +299,21 @@ class neuralLM {
   }
 
   double lookup_ngram(const int *ngram_a, int n) {
-    for (int i=0; i<ngram_size; i++) {
-      if (i-ngram_size+n < 0) {
+    for (int i = 0; i < ngram_size; i++) {
+      if (i - ngram_size + n < 0) {
         if (ngram_a[0] == start) {
           ngram(i) = start;
         } else {
           ngram(i) = null;
         }
       } else {
-        ngram(i) = ngram_a[i-ngram_size+n];
+        ngram(i) = ngram_a[i - ngram_size + n];
       }
     }
     return lookup_ngram(ngram);
   }
 
-  double lookup_ngram(const std::vector<int> &ngram_v) {
+  double lookup_ngram(const vector<int> &ngram_v) {
     return lookup_ngram(ngram_v.data(), ngram_v.size());
   }
 
@@ -322,12 +321,12 @@ class neuralLM {
     return ngram_size;
   }
 
-   void set_cache(std::size_t cache_size) {
+   void set_cache(size_t cache_size) {
     shared->set_cache(cache_size);
   }
 
   double cache_hit_rate() {
-    return static_cast<double>(shared->cache_hits)/shared->cache_lookups;
+    return static_cast<double>(shared->cache_hits) / shared->cache_lookups;
   }
 };
 
