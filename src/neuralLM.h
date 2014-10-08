@@ -192,7 +192,7 @@ class neuralLM {
       return shared->output_vocab.lookup_word(word);
     }
 
-    string mapped_wrod(word);
+    string mapped_word(word);
     for (int i = 0; i < word.length(); ++i) {
       if (isdigit(word[i])) {
         mapped_word[i] = map_digits;
