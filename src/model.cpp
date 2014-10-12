@@ -41,17 +41,20 @@ void model::initialize(
   second_hidden_linear.initialize(init_engine, init_normal, init_range);
 }
 
-void model::premultiply()
-{
-    // Since input and first_hidden_linear are both linear,
-    // we can multiply them into a single linear layer *if* we are not training
-    int context_size = ngram_size-1;
-    Matrix<double,Dynamic,Dynamic> U = first_hidden_linear.U;
-    first_hidden_linear.U.resize(num_hidden, input_vocab_size * context_size);
-    for (int i=0; i<context_size; i++)
-        first_hidden_linear.U.middleCols(i*input_vocab_size, input_vocab_size) = U.middleCols(i*input_embedding_dimension, input_embedding_dimension) * input_layer.W->transpose();
-    input_layer.W->resize(1,1); // try to save some memory
-    premultiplied = true;
+void model::premultiply() {
+  cerr << "Premultiplying NPLM" << endl;
+
+  // Since input and first_hidden_linear are both linear,
+  // we can multiply them into a single linear layer *if* we are not training
+  int context_size = ngram_size - 1;
+  Matrix<double, Dynamic, Dynamic> U = first_hidden_linear.U;
+  first_hidden_linear.U.resize(num_hidden, input_vocab_size * context_size);
+  for (int i = 0; i < context_size; i++) {
+      first_hidden_linear.U.middleCols(i * input_vocab_size, input_vocab_size) =
+          U.middleCols(i * input_embedding_dimension, input_embedding_dimension) * input_layer.W->transpose();
+  }
+  input_layer.W->resize(1, 1); // try to save some memory
+  premultiplied = true;
 }
 
 void model::readConfig(ifstream &config_file)
