@@ -45,7 +45,7 @@ First tokenize, lowercase, etc. your training data using your favourite tools. A
 Set `vocab_size` to a value lower than the true vocabulary size, so the model can learn a representation for unknown words (marked with the `<unk>` token).
 
 Alternatively, you can use an existing vocabulary by setting the `--words_file`
-flag inseated of `--write_words_file` and `--vocab_size`. The vocabulary file
+flag instead of `--write_words_file` and `--vocab_size`. The vocabulary file
 must contain one word per line. Note that the vocab file MUST include `<s>`,
 `</s>` and `<null>`, otherwise these tokens will get mapped to `<unk>`.
 
