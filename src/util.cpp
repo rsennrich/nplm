@@ -28,37 +28,32 @@ void splitBySpace(const std::string &line, std::vector<std::string> &items)
     boost::trim_if(copy, boost::is_any_of(" \t"));
     if (copy == "")
     {
-	items.clear();
-	return;
+  items.clear();
+  return;
     }
     boost::split(items, copy, boost::is_any_of(" \t"), boost::token_compress_on);
 }
 
-void readWordsFile(ifstream &TRAININ, vector<string> &word_list)
-{
+void readWordsFile(ifstream &TRAININ, vector<string>& word_list) {
   string line;
-  while (getline(TRAININ, line) && line != "")
-  {
+  while (getline(TRAININ, line) && line != "") {
     vector<string> words;
     splitBySpace(line, words);
-    if (words.size() != 1)
-    {
-        cerr << "Error: vocabulary file must have only one word per line" << endl;
-        exit(-1);
+    if (words.size() != 1) {
+      cerr << "Error: vocabulary file must have only one word per line" << endl;
+      exit(-1);
     }
     word_list.push_back(words[0]);
   }
 }
 
-void readWordsFile(const string &file, vector<string> &word_list)
-{
+void readWordsFile(const string &file, vector<string>& word_list) {
   cerr << "Reading word list from: " << file<< endl;
 
   ifstream TRAININ;
   TRAININ.open(file.c_str());
-  if (! TRAININ)
-  {
-    cerr << "Error: can't read word list from file " << file<< endl;
+  if (!TRAININ) {
+    cerr << "Error: can't read word list from file " << file << endl;
     exit(-1);
   }
 
@@ -70,7 +65,7 @@ void writeWordsFile(const vector<string> &words, ofstream &file)
 {
     for (int i=0; i<words.size(); i++)
     {
-	file << words[i] << endl;
+  file << words[i] << endl;
     }
 }
 
@@ -138,7 +133,7 @@ void readDataFile(const string &filename, int &ngram_size, vector<int> &data, in
     if (ngram.size() != ngram_size)
     {
         cerr << "Error: expected " << ngram_size << " fields in instance, found " << ngram.size() << endl;
-	exit(-1);
+  exit(-1);
     }
 
     for (int i=0;i<ngram_size;i++)
