@@ -89,13 +89,20 @@ class model {
 
   void read(const std::string &filename);
   void read(const std::string &filename, std::vector<std::string> &input_words, std::vector<std::string> &output_words);
-  void write(const std::string &filename, const std::vector<std::string> &input_words, const std::vector<std::string> &output_words);
-  void write(const std::string &filename);
+  void write(
+      const std::string &filename,
+      const std::vector<std::string> &input_words,
+      const std::vector<std::string> &output_words) const;
+  void write(
+      const std::string &filename) const;
 
  private:
   void readConfig(std::ifstream &config_file);
   void readConfig(const std::string &filename);
-  void write(const std::string &filename, const std::vector<std::string> *input_pwords, const std::vector<std::string> *output_pwords);
+  void write(
+      const std::string &filename,
+      const std::vector<std::string> *input_pwords,
+      const std::vector<std::string> *output_pwords) const;
 };
 
 } //namespace nplm

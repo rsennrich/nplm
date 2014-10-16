@@ -42,18 +42,25 @@ typedef long long int data_size_t; // training data can easily exceed 2G instanc
 
 
 void EvaluateModel(
-    propagator& prop_validation,
+    const model& nn, propagator& prop_validation,
+    const vector<string>& input_words, const vector<string>& output_words,
     const Map<Matrix<int,Dynamic,Dynamic> >& validation_data,
     int validation_data_size, int validation_minibatch_size,
     int num_validation_batches, int output_vocab_size, int ngram_size,
-    int epoch, double& current_learning_rate, double& current_validation_ll) {
+    int epoch, const string& model_file, const string& input_words_file,
+    double& current_learning_rate, double& current_validation_ll) {
   if (validation_data_size > 0) {
     double log_likelihood = 0.0;
     Matrix<double,Dynamic,Dynamic> scores(output_vocab_size, validation_minibatch_size);
     Matrix<double,Dynamic,Dynamic> output_probs(output_vocab_size, validation_minibatch_size);
     Matrix<int,Dynamic,Dynamic> minibatch(ngram_size, validation_minibatch_size);
 
+    cerr << endl;
+    cerr << "Validation minibatches: " << endl;
     for (int validation_batch = 0; validation_batch < num_validation_batches; validation_batch++) {
+      if (validation_batch % 50 == 0) {
+        cerr << validation_batch << "... ";
+      }
       int validation_minibatch_start_index = validation_minibatch_size * validation_batch;
       int current_minibatch_size =
           min(validation_minibatch_size, validation_data_size - validation_minibatch_start_index);
@@ -85,8 +92,18 @@ void EvaluateModel(
     // If the validation perplexity decreases, halve the learning rate.
     if (epoch > 0 && log_likelihood < current_validation_ll) {
       current_learning_rate /= 2;
+    } else {
+      current_validation_ll = log_likelihood;
+
+      if (model_file != "") {
+        cerr << "Writing model" << endl;
+        if (input_words_file != "") {
+          nn.write(model_file, input_words, output_words);
+        } else {
+          nn.write(model_file);
+        }
+      }
     }
-    current_validation_ll = log_likelihood;
   }
 }
 
@@ -137,7 +154,7 @@ int main(int argc, char** argv) {
     ValueArg<int> output_vocab_size("", "output_vocab_size", "Vocabulary size. Default: auto.", false, 0, "int", cmd);
     ValueArg<int> ngram_size("", "ngram_size", "Size of n-grams. Default: auto.", false, 0, "int", cmd);
 
-    ValueArg<string> model_prefix("", "model_prefix", "Prefix for output model files." , false, "", "string", cmd);
+    ValueArg<string> model_file("", "model_file", "Prefix for output model files." , false, "", "string", cmd);
     ValueArg<string> words_file("", "words_file", "Vocabulary." , false, "", "string", cmd);
     ValueArg<string> input_words_file("", "input_words_file", "Vocabulary." , false, "", "string", cmd);
     ValueArg<string> output_words_file("", "output_words_file", "Vocabulary." , false, "", "string", cmd);
@@ -155,7 +172,7 @@ int main(int argc, char** argv) {
       myParam.input_words_file = myParam.output_words_file = words_file.getValue();
     }
 
-    myParam.model_prefix = model_prefix.getValue();
+    myParam.model_file = model_file.getValue();
 
     myParam.ngram_size = ngram_size.getValue();
     myParam.vocab_size = vocab_size.getValue();
@@ -202,7 +219,7 @@ int main(int argc, char** argv) {
     cerr << input_words_file.getDescription() << sep << input_words_file.getValue() << endl;
     cerr << output_words_file.getDescription() << sep << output_words_file.getValue() << endl;
     cerr << words_file.getDescription() << sep << words_file.getValue() << endl;
-    cerr << model_prefix.getDescription() << sep << model_prefix.getValue() << endl;
+    cerr << model_file.getDescription() << sep << model_file.getValue() << endl;
 
     cerr << ngram_size.getDescription() << sep << ngram_size.getValue() << endl;
     cerr << input_vocab_size.getDescription() << sep << input_vocab_size.getValue() << endl;
@@ -402,7 +419,7 @@ int main(int argc, char** argv) {
       current_momentum = -1;
     }
 
-    cerr << "Training minibatches: ";
+    cerr << "Training minibatches: " << endl;
 
     double log_likelihood = 0.0;
 
@@ -420,13 +437,16 @@ int main(int argc, char** argv) {
 
     for (data_size_t batch = 0; batch < num_batches; batch++) {
       if (batch > 0 && batch % 10000 == 0) {
-        cerr << batch << "...";
-        if (batch % 1000000 == 0) {
+        cerr << batch << "... ";
+        if (batch % 200000 == 0) {
           EvaluateModel(
-              prop_validation, validation_data, validation_data_size,
+              nn, prop_validation, input_words, output_words,
+              validation_data, validation_data_size,
               validation_minibatch_size, num_validation_batches,
               output_vocab_size, ngram_size, epoch,
+              myParam.model_file, myParam.input_words_file,
               current_learning_rate, current_validation_ll);
+          cerr << "Training minibatches: " << endl;
         }
       }
 
@@ -564,19 +584,12 @@ int main(int argc, char** argv) {
     cerr << endl;
     #endif
 
-    if (myParam.model_prefix != "") {
-      cerr << "Writing model" << endl;
-      if (myParam.input_words_file != "") {
-        nn.write(myParam.model_prefix + "." + lexical_cast<string>(epoch+1), input_words, output_words);
-      } else {
-        nn.write(myParam.model_prefix + "." + lexical_cast<string>(epoch+1));
-      }
-    }
-
     EvaluateModel(
-        prop_validation, validation_data, validation_data_size,
+        nn, prop_validation, input_words, output_words,
+        validation_data, validation_data_size,
         validation_minibatch_size, num_validation_batches,
         output_vocab_size, ngram_size, epoch,
+        myParam.input_words_file, myParam.model_file,
         current_learning_rate, current_validation_ll);
   }
 

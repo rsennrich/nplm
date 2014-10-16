@@ -180,69 +180,71 @@ void model::read(const string &filename, vector<string> &input_words, vector<str
     file.close();
 }
 
-    void model::write(const string &filename, const vector<string> &input_words, const vector<string> &output_words)
-{
-    write(filename, &input_words, &output_words);
+void model::write(
+    const string &filename,
+    const vector<string> &input_words,
+    const vector<string> &output_words) const {
+  write(filename, &input_words, &output_words);
 }
 
-void model::write(const string &filename)
-{
-    write(filename, NULL, NULL);
+void model::write(const string &filename) const {
+  write(filename, NULL, NULL);
 }
 
-    void model::write(const string &filename, const vector<string> *input_pwords, const vector<string> *output_pwords)
-{
-    ofstream file(filename.c_str());
-    if (!file) throw runtime_error("Could not open file " + filename);
+void model::write(
+    const string &filename,
+    const vector<string> *input_pwords,
+    const vector<string> *output_pwords) const {
+  ofstream file(filename.c_str());
+  if (!file) {
+    throw runtime_error("Could not open file " + filename);
+  }
 
-    file << "\\config" << endl;
-    file << "version 1" << endl;
-    file << "ngram_size " << ngram_size << endl;
-    file << "input_vocab_size " << input_vocab_size << endl;
-    file << "output_vocab_size " << output_vocab_size << endl;
-    file << "input_embedding_dimension " << input_embedding_dimension << endl;
-    file << "num_hidden " << num_hidden << endl;
-    file << "output_embedding_dimension " << output_embedding_dimension << endl;
-    file << "activation_function " << activation_function_to_string(activation_function) << endl;
-    file << endl;
+  file << "\\config" << endl;
+  file << "version 1" << endl;
+  file << "ngram_size " << ngram_size << endl;
+  file << "input_vocab_size " << input_vocab_size << endl;
+  file << "output_vocab_size " << output_vocab_size << endl;
+  file << "input_embedding_dimension " << input_embedding_dimension << endl;
+  file << "num_hidden " << num_hidden << endl;
+  file << "output_embedding_dimension " << output_embedding_dimension << endl;
+  file << "activation_function " << activation_function_to_string(activation_function) << endl;
+  file << endl;
 
-    if (input_pwords)
-    {
-        file << "\\input_vocab" << endl;
-	writeWordsFile(*input_pwords, file);
-	file << endl;
-    }
+  if (input_pwords) {
+    file << "\\input_vocab" << endl;
+	  writeWordsFile(*input_pwords, file);
+	  file << endl;
+  }
 
-    if (output_pwords)
-    {
-        file << "\\output_vocab" << endl;
-	writeWordsFile(*output_pwords, file);
-	file << endl;
-    }
+  if (output_pwords) {
+    file << "\\output_vocab" << endl;
+	  writeWordsFile(*output_pwords, file);
+	  file << endl;
+  }
 
-    file << "\\input_embeddings" << endl;
-    input_layer.write(file);
-    file << endl;
+  file << "\\input_embeddings" << endl;
+  input_layer.write(file);
+  file << endl;
 
-    file << "\\hidden_weights 1" << endl;
-    first_hidden_linear.write(file);
-    file << endl;
+  file << "\\hidden_weights 1" << endl;
+  first_hidden_linear.write(file);
+  file << endl;
 
-    file << "\\hidden_weights 2" << endl;
-    second_hidden_linear.write(file);
-    file << endl;
+  file << "\\hidden_weights 2" << endl;
+  second_hidden_linear.write(file);
+  file << endl;
 
-    file << "\\output_weights" << endl;
-    output_layer.write_weights(file);
-    file << endl;
+  file << "\\output_weights" << endl;
+  output_layer.write_weights(file);
+  file << endl;
 
-    file << "\\output_biases" << endl;
-    output_layer.write_biases(file);
-    file << endl;
+  file << "\\output_biases" << endl;
+  output_layer.write_biases(file);
+  file << endl;
 
-    file << "\\end" << endl;
-    file.close();
+  file << "\\end" << endl;
+  file.close();
 }
-
 
 } // namespace nplm

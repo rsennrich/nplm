@@ -59,7 +59,7 @@ class Linear_layer {
     readMatrix(U_file, U);
   }
 
-  void write(std::ofstream &U_file) {
+  void write(std::ofstream &U_file) const {
     writeMatrix(U, U_file);
   }
 
@@ -181,7 +181,7 @@ class Output_word_embeddings {
     readMatrix(W_file, *W);
   }
 
-  void write_weights(std::ofstream &W_file) {
+  void write_weights(std::ofstream &W_file) const {
     writeMatrix(*W, W_file);
   }
 
@@ -189,7 +189,7 @@ class Output_word_embeddings {
     readMatrix(b_file, b);
   }
 
-  void write_biases(std::ofstream &b_file) {
+  void write_biases(std::ofstream &b_file) const {
     writeMatrix(b, b_file);
   }
 
@@ -398,7 +398,7 @@ class Input_word_embeddings {
     readMatrix(W_file, *W);
   }
 
-  void write(std::ofstream &W_file) {
+  void write(std::ofstream &W_file) const {
     writeMatrix(*W, W_file);
   }
 
