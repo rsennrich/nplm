@@ -8,3 +8,5 @@ src/prepareNeuralTM
 src/testNeuralLM
 src/testNeuralNetwork
 src/trainNeuralNetwork
+bin
+lib

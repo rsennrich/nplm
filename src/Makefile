@@ -6,7 +6,7 @@ CXX=g++
 
 # Compiler options. Note that -DEIGEN_NO_DEBUG is essential for good performance!
 #CFLAGS=-g
-CFLAGS=-O3 -DEIGEN_NO_DEBUG -DNDEBUG 
+CFLAGS=-O3 -DEIGEN_NO_DEBUG
 
 # Architecture. Set to x86_64 or i686 to override.
 ARCH:=$(shell uname -m)
@@ -19,19 +19,16 @@ OS:=$(shell uname -s)
 ### Required libraries. You must install these prior to building.
 
 # Set this to the root directory of Boost (should have a subdirectory named boost):
-BOOST=/home/hieu/workspace/boost/boost_1_55_0.gcc
+BOOST=/home/paulb/mylibs/boost-1.55.0
 #BOOST=/usr
 #BOOST=/opt/local
 # Where to find Boost header files
 BOOST_INC=$(BOOST)/include
 
-# Set this to the root directory of Eigen (should have a subdirectory named Eigen):
-EIGEN=/home/hieu/workspace/eigen-3
-
 ### Optional libraries.
 
 # To disable multithreading, comment out the line below:
-#OMP=1
+OMP=1
 
 # To use the MKL library, uncomment the line below and set it to the MKL root:
 #MKL=/usr/usc/intel/12.1.1/mkl
@@ -104,7 +101,7 @@ ifdef STATIC
   LDFLAGS+=-static
 endif
 
-ALL_CFLAGS=$(OMP_CFLAGS) $(MKL_CFLAGS) $(BOOST_CFLAGS) -I$(TCLAP) -I$(EIGEN) $(CFLAGS)
+ALL_CFLAGS=$(OMP_CFLAGS) $(MKL_CFLAGS) $(BOOST_CFLAGS) -I$(TCLAP) $(CFLAGS)
 ALL_LDFLAGS=$(OMP_LDFLAGS) $(MKL_LDFLAGS) $(BOOST_LDFLAGS) $(LDFLAGS)
 ALL_LDLIBS=$(MKL_LDLIBS) $(BOOST_LDLIBS)
 
