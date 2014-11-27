@@ -16,7 +16,7 @@
 # include <boost/interprocess/managed_mapped_file.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 
-#include <../3rdparty/Eigen/Dense>
+#include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "maybe_omp.h"
 #include <tclap/CmdLine.h>
