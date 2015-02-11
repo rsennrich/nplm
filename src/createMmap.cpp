@@ -32,7 +32,7 @@ data_size_t getNumLines(const string &filename) {
   data_size_t lines = 0;
   std::string line;
   while (std::getline(training, line)) {
-    if ((lines%100000)==0) {
+    if ((lines%10000000)==0) {
         std::cerr<<lines<<"...";
     }
     ++lines;
@@ -73,7 +73,7 @@ void writeMmap(const string &filename_input,
   std::vector<std::string> ngram;
   while (std::getline(training, line)) {
 
-    if ((i%100000)==0) {
+    if ((i%10000000)==0) {
         std::cerr<<i<<"...";
     }
 
