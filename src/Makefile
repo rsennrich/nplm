@@ -138,7 +138,7 @@ RANLIB=ranlib
 
 # Rules
 
-BINS=trainNeuralNetwork testNeuralNetwork prepareNeuralLM testNeuralLM prepareNeuralTM
+BINS=trainNeuralNetwork testNeuralNetwork prepareNeuralLM testNeuralLM prepareNeuralTM createMmap
 LIBS=libnplm.a libnplm.so
 OBJS=util.o model.o
 
@@ -172,6 +172,9 @@ testNeuralLM: testNeuralLM.o $(OBJS)
 	$(CXX) $(ALL_LDFLAGS) $^ $(ALL_LDLIBS) -o $@
 
 prepareNeuralTM: prepareNeuralTM.o $(OBJS)
+	$(CXX) $(ALL_LDFLAGS) $^ $(ALL_LDLIBS) -o $@
+
+createMmap: createMmap.o $(OBJS)
 	$(CXX) $(ALL_LDFLAGS) $^ $(ALL_LDLIBS) -o $@
 
 libnplm.a: neuralLM.o $(OBJS)
