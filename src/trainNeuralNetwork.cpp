@@ -141,7 +141,7 @@ int main(int argc, char** argv)
       myParam.vocab_size = vocab_size.getValue();
       myParam.input_vocab_size = input_vocab_size.getValue();
       myParam.output_vocab_size = output_vocab_size.getValue();
-      if (vocab_size.getValue() >= 0) {
+      if (vocab_size.getValue() > 0) {
 	      myParam.input_vocab_size = myParam.output_vocab_size = vocab_size.getValue();
       }
       myParam.num_hidden = num_hidden.getValue();
@@ -324,7 +324,7 @@ int main(int argc, char** argv)
           for (data_size_t i=vector_size-1; i>0; i--)
           {
             if (i %500000 == 0) {
-              cerr<<"Shuffled "<<training_data_size-1<<" instances...";
+              cerr<<".";
             }
             data_size_t j = boost::random::uniform_int_distribution<data_size_t>(0, i-1)(rng);
             for (int k=0;k<myParam.ngram_size;k++) {
