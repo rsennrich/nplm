@@ -45,7 +45,7 @@ public:
     }
 
     const vocabulary &get_input_vocabulary() const { return *(this->input_vocab); }
-    const vocabulary &get_output_vocabulary() const { return *(this->input_vocab); }
+    const vocabulary &get_output_vocabulary() const { return *(this->output_vocab); }
 
     int lookup_input_word(const std::string &word) const
     {
