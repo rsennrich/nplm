@@ -24,6 +24,8 @@ int main (int argc, char *argv[])
       // program options //
       CmdLine cmd("Tests a two-layer neural probabilistic language model.", ' ' , "0.1");
 
+      ValueArg<int> debug("", "debug", "Debug level. Higher debug levels print log-probabilities of each n-gram (level 1), and n-gram itself (level 2). Default: 0.", false, 0, "int", cmd);
+
       ValueArg<int> num_threads("", "num_threads", "Number of threads. Default: maximum.", false, 0, "int", cmd);
       ValueArg<int> minibatch_size("", "minibatch_size", "Minibatch size. Default: 64.", false, 64, "int", cmd);
 
@@ -38,6 +40,7 @@ int main (int argc, char *argv[])
 
       myParam.num_threads  = num_threads.getValue();
       myParam.minibatch_size = minibatch_size.getValue();
+      myParam.debug = debug.getValue();
 
       cerr << "Command line: " << endl;
       cerr << boost::algorithm::join(vector<string>(argv, argv+argc), " ") << endl;
@@ -115,8 +118,14 @@ int main (int argc, char *argv[])
 			       minibatch_log_likelihood);
 	log_likelihood += minibatch_log_likelihood;
 
-	/*for (int i=0; i<current_minibatch_size; i++)
-	  cerr << minibatch.block(0,i,myParam.ngram_size,1) << " " << output_probs(minibatch(myParam.ngram_size-1,i),i) << endl;*/
+        if (myParam.debug > 0) {
+          for (int i=0; i<current_minibatch_size; i++) {
+            if (myParam.debug > 1) {
+              cerr << minibatch.block(0,i,myParam.ngram_size,1).transpose() << " ";
+            }
+            cerr << output_probs(minibatch(myParam.ngram_size-1,i),i) << endl;
+          }
+        }
 	
     }	
     cerr << "Test log-likelihood: " << log_likelihood << endl;

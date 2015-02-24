@@ -54,6 +54,7 @@ struct param
     double normalization_init;
 
     int num_threads;
+    int debug;
   
     bool share_embeddings;
 
