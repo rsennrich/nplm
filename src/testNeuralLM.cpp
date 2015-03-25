@@ -6,7 +6,8 @@
 #include <tclap/CmdLine.h>
 
 #include <Eigen/Core>
-#include <../3rdparty/Eigen/Dense>
+//#include <../3rdparty/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include "param.h"
 

@@ -1,7 +1,8 @@
 	#ifndef SOFTMAXLOSS_H
 #define SOFTMAXLOSS_H
 
-#include <../3rdparty/Eigen/Dense>
+//#include <../3rdparty/Eigen/Dense>
+#include <Eigen/Dense>
 #include "multinomial.h"
 #include "util.h"
 
