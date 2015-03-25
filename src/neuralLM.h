@@ -6,7 +6,8 @@
 #include <cstdlib>
 #include <boost/shared_ptr.hpp>
 
-#include <../3rdparty/Eigen/Dense>
+//#include <../3rdparty/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include "util.h"
 #include "vocabulary.h"
