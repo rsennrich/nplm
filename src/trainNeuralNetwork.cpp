@@ -574,7 +574,7 @@ int main(int argc, char** argv)
               minibatch = training_data.middleCols(minibatch_start_index, current_minibatch_size);
             }
       #endif 
-            double adjusted_learning_rate = current_learning_rate/current_minibatch_size;
+            double adjusted_learning_rate = current_learning_rate/minibatch_size;
             //cerr<<"Adjusted learning rate: "<<adjusted_learning_rate<<endl;
 
             /*
