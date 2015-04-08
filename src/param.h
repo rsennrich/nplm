@@ -55,7 +55,8 @@ struct param
 
     int num_threads;
     int debug;
-  
+    bool premultiply;
+
     bool share_embeddings;
 
 };

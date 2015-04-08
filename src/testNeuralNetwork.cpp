@@ -27,6 +27,8 @@ int main (int argc, char *argv[])
       ValueArg<int> debug("", "debug", "Debug level. Higher debug levels print log-probabilities of each n-gram (level 1), and n-gram itself (level 2). Default: 0.", false, 0, "int", cmd);
 
       ValueArg<int> num_threads("", "num_threads", "Number of threads. Default: maximum.", false, 0, "int", cmd);
+      SwitchArg premultiply("", "premultiply", "premultiply hidden layer.", cmd, false);
+      SwitchArg unnormalized("", "unnormalized", "do not normalize output.", cmd, false);
       ValueArg<int> minibatch_size("", "minibatch_size", "Minibatch size. Default: 64.", false, 64, "int", cmd);
 
       ValueArg<string> arg_test_file("", "test_file", "Test file (one numberized example per line).", true, "", "string", cmd);
@@ -39,6 +41,8 @@ int main (int argc, char *argv[])
       myParam.test_file = arg_test_file.getValue();
 
       myParam.num_threads  = num_threads.getValue();
+      myParam.premultiply  = premultiply.getValue();
+      myParam.normalization  = !unnormalized.getValue();
       myParam.minibatch_size = minibatch_size.getValue();
       myParam.debug = debug.getValue();
 
@@ -75,6 +79,11 @@ int main (int argc, char *argv[])
     myParam.input_embedding_dimension = nn.input_embedding_dimension;
     myParam.output_embedding_dimension = nn.output_embedding_dimension;
 
+    if (myParam.premultiply) {
+      cerr << "Premultiplying hidden layer" << endl;
+      nn.premultiply();
+    }
+
     ///// Read test data
 
     vector<int> test_data_flat;
@@ -103,20 +112,35 @@ int main (int argc, char *argv[])
 	
 	prop.fProp(minibatch.topRows(myParam.ngram_size-1));
 
-	// Do full forward prop through output word embedding layer
-        if (prop.skip_hidden)
-            prop.output_layer_node.param->fProp(prop.first_hidden_activation_node.fProp_matrix, scores);
-        else
-            prop.output_layer_node.param->fProp(prop.second_hidden_activation_node.fProp_matrix, scores);
+	if (myParam.normalization)
+	{
+	    // Do full forward prop through output word embedding layer
+	    if (prop.skip_hidden)
+		prop.output_layer_node.param->fProp(prop.first_hidden_activation_node.fProp_matrix, scores);
+	    else
+		prop.output_layer_node.param->fProp(prop.second_hidden_activation_node.fProp_matrix, scores);
 
 
-	// And softmax and loss
-	double minibatch_log_likelihood;
-	SoftmaxLogLoss().fProp(scores.leftCols(current_minibatch_size), 
-			       minibatch.row(myParam.ngram_size-1), 
-			       output_probs,
-			       minibatch_log_likelihood);
-	log_likelihood += minibatch_log_likelihood;
+	    // And softmax and loss
+	    double minibatch_log_likelihood;
+	    SoftmaxLogLoss().fProp(scores.leftCols(current_minibatch_size), 
+				  minibatch.row(myParam.ngram_size-1), 
+				  output_probs,
+				  minibatch_log_likelihood);
+	    log_likelihood += minibatch_log_likelihood;
+	}
+	else
+	{
+	    for (int j=0; j<current_minibatch_size; j++)
+	    {
+	        int output = minibatch(nn.ngram_size-1, j);
+                if (prop.skip_hidden)
+                    output_probs(output, j) = prop.output_layer_node.param->fProp(prop.first_hidden_activation_node.fProp_matrix, output, j);
+                else
+                    output_probs(output, j) = prop.output_layer_node.param->fProp(prop.second_hidden_activation_node.fProp_matrix, output, j);
+		log_likelihood += output_probs(output, j);
+	    }
+	}
 
         if (myParam.debug > 0) {
           for (int i=0; i<current_minibatch_size; i++) {
