@@ -45,6 +45,16 @@ class neuralLM : public neuralNetwork, graehl::replace_digits
 
   const vocabulary &get_vocabulary() const { return *(this->vocab); }
 
+  int lookup_input_word(const std::string &word) const
+  {
+    return lookup_word(word);
+  }
+
+  int lookup_input_word(std::pair<char const*, char const*> word) const
+  {
+    return lookup_word(word);
+  }
+
 
   int lookup_word(const std::string &word) const
   {
