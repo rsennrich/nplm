@@ -95,6 +95,7 @@ class Activation_function
 	    case Rectifier: my_output = input.unaryExpr(rectifier_functor()); break;
 	    case Tanh: my_output = input.unaryExpr(tanh_functor()); break;
 	    case HardTanh: my_output = input.unaryExpr(hardtanh_functor()); break;
+            case InvalidFunction: std::abort();
 	    }
         }
 
@@ -112,6 +113,7 @@ class Activation_function
 	    case Rectifier: my_output = finput.array().unaryExpr(drectifier_functor()) * input.array(); break;
 	    case Tanh: my_output = foutput.array().unaryExpr(tanh_functor()) * input.array(); break;
 	    case HardTanh: my_output = finput.array().unaryExpr(hardtanh_functor()) * input.array(); break;
+            case InvalidFunction: std::abort();
 	    }
         }
 };

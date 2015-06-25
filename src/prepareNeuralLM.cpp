@@ -219,7 +219,7 @@ void writeMmapNgrams(const string &input_filename,
     //now to randomize the items if the randomize flag was set
     if (randomize == true) {
       unsigned seed = 1234; //for testing only
-      mt19937 rng(seed);
+      boost::random::mt19937 rng(seed);
        cerr<<"Randomly shuffling data...";
         data_size_t counter =0;
         while (counter < num_tokens) {
