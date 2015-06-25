@@ -5,6 +5,9 @@
 #include <string>
 #include <queue>
 #include <boost/unordered_map.hpp>
+#include "find_string.hpp"
+
+#define NPLM_HAVE_FIND_STRING_PIECE 1
 
 namespace nplm
 {
@@ -17,7 +20,8 @@ struct compare_second
 
 class vocabulary {
   std::vector<std::string> m_words;
-  boost::unordered_map<std::string, int> m_index;
+  typedef boost::unordered_map<std::string, int> WordId;
+  WordId m_index;
   int unk;
 
  public:
@@ -37,21 +41,24 @@ class vocabulary {
 
   int lookup_word(const std::string &word) const
   {
-    boost::unordered_map<std::string, int>::const_iterator pos = m_index.find(word);
-    if (pos != m_index.end())
-      return pos->second;
-    else
-      return unk;
+    return lookup_word(word, unk);
   }
 
   // lookup word using custom unknown-word id
-  int lookup_word(const std::string &word, int unk) const
+  int lookup_word(const std::string &word, int unkid) const
   {
-    boost::unordered_map<std::string, int>::const_iterator pos = m_index.find(word);
-    if (pos != m_index.end())
-      return pos->second;
-    else
-      return unk;
+    WordId::const_iterator pos = m_index.find(word);
+    return pos == m_index.end() ? unkid : pos->second;
+  }
+
+  int lookup_word(std::pair<char const*, char const*> slice) const {
+    return lookup_word(slice, unk);
+  }
+
+  int lookup_word(std::pair<char const*, char const*> slice, int unkid) const
+  {
+    WordId::const_iterator pos = find_string(m_index, slice);
+    return pos == m_index.end() ? unkid : pos->second;
   }
 
   int insert_word(const std::string &word)
@@ -89,7 +96,6 @@ class vocabulary {
 
   const std::vector<std::string> &words() const { return m_words; }
 
-  const boost::unordered_map<std::string, int>& get_idmap() const { return m_index; }
 };
 
 } // namespace nplm

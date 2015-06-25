@@ -11,6 +11,7 @@
 #include "util.h"
 #include "vocabulary.h"
 #include "neuralNetwork.h"
+#include "replace_digits.hpp"
 
 /*
   To do:
@@ -20,17 +21,16 @@
 namespace nplm
 {
 
-class neuralLM : public neuralNetwork
+class neuralLM : public neuralNetwork, graehl::replace_digits
 {
-  char map_digits;
   boost::shared_ptr<vocabulary> vocab;
   int start, null;
 
  public:
   neuralLM()
       : neuralNetwork(),
-        vocab(new vocabulary()),
-        map_digits(0)
+        graehl::replace_digits(0),
+        vocab(new vocabulary())
   {
   }
 
@@ -45,25 +45,35 @@ class neuralLM : public neuralNetwork
 
   const vocabulary &get_vocabulary() const { return *(this->vocab); }
 
+
   int lookup_word(const std::string &word) const
   {
     if (map_digits)
-      for (int i=0; i<word.length(); i++)
-        if (isdigit(word[i]))
-        {
+      for (int i=0, n=word.size(); i<n; ++i)
+        if (graehl::ascii_digit(word[i])) {
           std::string mapped_word(word);
-          for (; i<word.length(); i++)
-            if (isdigit(word[i]))
-              mapped_word[i] = map_digits;
+          replace(mapped_word, i);
           return vocab->lookup_word(mapped_word);
         }
     return vocab->lookup_word(word);
   }
 
+  int lookup_word(std::pair<char const*, char const*> slice) const
+  {
+    if (map_digits)
+      for (char const* i = slice.first; i != slice.second; ++i)
+        if (graehl::ascii_digit(*i)) {
+          std::string mapped_word(slice.first, slice.second);
+          replace(mapped_word, i - slice.first);
+          return vocab->lookup_word(mapped_word);
+        }
+    return vocab->lookup_word(slice);
+  }
+
   double lookup_ngram(const int *ngram_a, int n)
   {
     Eigen::Matrix<int,Eigen::Dynamic,1> ngram(m->ngram_size);
-    for (int i=0; i<m->ngram_size; i++)
+    for (int i=0; i<m->ngram_size; ++i)
     {
       if (i-m->ngram_size+n < 0)
       {
@@ -114,7 +124,7 @@ void addStartStop(std::vector<T> &input, std::vector<T> &output, int ngram_size,
 {
   output.clear();
   output.resize(input.size()+ngram_size);
-  for (int i=0; i<ngram_size-1; i++)
+  for (int i=0; i<ngram_size-1; ++i)
     output[i] = start;
   std::copy(input.begin(), input.end(), output.begin()+ngram_size-1);
   output[output.size()-1] = stop;
@@ -168,7 +178,7 @@ inline void preprocessWords(const std::vector<std::string> &words,
   else {
     if (nums.size() != ngram_size)
     {
-      std::cerr << "error: wrong number of fields in line" << std::endl;
+      std::cerr << "error: wrong number of fields in line\n";
       std::exit(1);
     }
     ngrams.push_back(nums);

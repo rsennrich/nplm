@@ -8,3 +8,4 @@ src/prepareNeuralTM
 src/testNeuralLM
 src/testNeuralNetwork
 src/trainNeuralNetwork
+.history
