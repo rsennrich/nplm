@@ -9,3 +9,4 @@ src/testNeuralLM
 src/testNeuralNetwork
 src/trainNeuralNetwork
 .history
+src/make.sh
