@@ -316,7 +316,7 @@ int main(int argc, char** argv)
 
     //unsigned seed = std::time(0);
     unsigned seed = 1234; //for testing only
-    mt19937 rng(seed);
+    boost::random::mt19937 rng(seed);
 
     /////////////////////////READING IN THE TRAINING AND VALIDATION DATA///////////////////
     /////////////////////////////////////////////////////////////////////////////////////

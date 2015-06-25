@@ -271,8 +271,8 @@ extern Timer timer;
 #define start_timer(x) timer.start(x)
 #define stop_timer(x) timer.stop(x)
 #else
-#define start_timer(x) 0
-#define stop_timer(x) 0
+#define start_timer(x) (void)0
+#define stop_timer(x) (void)0
 #endif
 
 int setup_threads(int n_threads);

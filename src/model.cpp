@@ -44,7 +44,7 @@ void model::resize(int ngram_size,
     premultiplied = false;
 }
   
-void model::initialize(mt19937 &init_engine,
+void model::initialize(boost::random::mt19937 &init_engine,
     bool init_normal,
     double init_range,
     double init_bias,
