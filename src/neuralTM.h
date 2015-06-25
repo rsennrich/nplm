@@ -54,9 +54,9 @@ class neuralTM : public neuralNetwork, graehl::replace_digits
         if (graehl::ascii_digit(word[i])) {
           std::string mapped_word(word);
           replace(mapped_word, i);
-          return vocab->lookup_word(mapped_word);
+          return vocab.lookup_word(mapped_word);
         }
-    return vocab->lookup_word(word);
+    return vocab.lookup_word(word);
   }
 
   int lookup_word(std::pair<char const*, char const*> slice, vocabulary const& vocab) const
@@ -66,9 +66,9 @@ class neuralTM : public neuralNetwork, graehl::replace_digits
         if (graehl::ascii_digit(*i)) {
           std::string mapped_word(slice.first, slice.second);
           replace(mapped_word, i - slice.first);
-          return vocab->lookup_word(mapped_word);
+          return vocab.lookup_word(mapped_word);
         }
-    return vocab->lookup_word(slice);
+    return vocab.lookup_word(slice);
   }
 
   int lookup_input_word(const std::string &word) const
