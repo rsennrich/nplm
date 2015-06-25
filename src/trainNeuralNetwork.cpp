@@ -6,17 +6,16 @@
 #include <vector>
 #include <algorithm>
 
-#include <boost/unordered_map.hpp> 
+#include <boost/unordered_map.hpp>
 #include <boost/functional.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/algorithm/string/join.hpp>
-# include <boost/interprocess/managed_shared_memory.hpp>
-# include <boost/interprocess/allocators/allocator.hpp>
-# include <boost/interprocess/managed_mapped_file.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/allocators/allocator.hpp>
+#include <boost/interprocess/managed_mapped_file.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 
-//#include <../3rdparty/Eigen/Dense>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "maybe_omp.h"
@@ -29,7 +28,6 @@
 #include "graphClasses.h"
 #include "util.h"
 #include "multinomial.h"
-//#include "gradientCheck.h"
 
 //#define EIGEN_DONT_PARALLELIZE
 
@@ -65,7 +63,7 @@ void compute_validation_perplexity(int ngram_size, int output_vocab_size, int va
         int validation_minibatch_start_index = validation_minibatch_size * validation_batch;
         int current_minibatch_size = min(validation_minibatch_size,
                                           validation_data_size - validation_minibatch_start_index);
-        minibatch.leftCols(current_minibatch_size) = validation_data.middleCols(validation_minibatch_start_index, 
+        minibatch.leftCols(current_minibatch_size) = validation_data.middleCols(validation_minibatch_start_index,
                                                                                 current_minibatch_size);
         prop_validation.fProp(minibatch.topRows(ngram_size-1));
 
@@ -80,7 +78,7 @@ void compute_validation_perplexity(int ngram_size, int output_vocab_size, int va
         // And softmax and loss. Be careful of short minibatch
         double minibatch_log_likelihood;
         start_timer(5);
-        SoftmaxLogLoss().fProp(scores.leftCols(current_minibatch_size), 
+        SoftmaxLogLoss().fProp(scores.leftCols(current_minibatch_size),
                                 minibatch.row(ngram_size-1),
                                 output_probs,
                                 minibatch_log_likelihood);
@@ -93,7 +91,7 @@ void compute_validation_perplexity(int ngram_size, int output_vocab_size, int va
 
     // If the validation perplexity decreases, halve the learning rate.
     if (current_validation_ll != 0.0 && log_likelihood < current_validation_ll && myParam.parameter_update != "ADA")
-    { 
+    {
         current_learning_rate /= 2;
     }
     current_validation_ll = log_likelihood;
@@ -101,7 +99,7 @@ void compute_validation_perplexity(int ngram_size, int output_vocab_size, int va
 
 
 int main(int argc, char** argv)
-{ 
+{
     ios::sync_with_stdio(false);
     bool use_mmap_file, randomize;
     param myParam;
@@ -183,7 +181,7 @@ int main(int argc, char** argv)
       myParam.input_words_file = input_words_file.getValue();
       myParam.output_words_file = output_words_file.getValue();
       if (words_file.getValue() != "")
-	      myParam.input_words_file = myParam.output_words_file = words_file.getValue();
+        myParam.input_words_file = myParam.output_words_file = words_file.getValue();
 
       myParam.model_prefix = model_prefix.getValue();
 
@@ -192,7 +190,7 @@ int main(int argc, char** argv)
       myParam.input_vocab_size = input_vocab_size.getValue();
       myParam.output_vocab_size = output_vocab_size.getValue();
       if (vocab_size.getValue() > 0) {
-	      myParam.input_vocab_size = myParam.output_vocab_size = vocab_size.getValue();
+        myParam.input_vocab_size = myParam.output_vocab_size = vocab_size.getValue();
       }
       myParam.num_hidden = num_hidden.getValue();
       myParam.activation_function = activation_function.getValue();
@@ -205,7 +203,7 @@ int main(int argc, char** argv)
       myParam.input_embedding_dimension = input_embedding_dimension.getValue();
       myParam.output_embedding_dimension = output_embedding_dimension.getValue();
       if (embedding_dimension.getValue() >= 0) {
-	      myParam.input_embedding_dimension = myParam.output_embedding_dimension = embedding_dimension.getValue();
+        myParam.input_embedding_dimension = myParam.output_embedding_dimension = embedding_dimension.getValue();
       }
 
       myParam.minibatch_size = minibatch_size.getValue();
@@ -243,33 +241,33 @@ int main(int argc, char** argv)
 
       if (embedding_dimension.getValue() >= 0)
       {
-	      cerr << embedding_dimension.getDescription() << sep << embedding_dimension.getValue() << endl;
+        cerr << embedding_dimension.getDescription() << sep << embedding_dimension.getValue() << endl;
       }
       else
       {
-	      cerr << input_embedding_dimension.getDescription() << sep << input_embedding_dimension.getValue() << endl;
-	      cerr << output_embedding_dimension.getDescription() << sep << output_embedding_dimension.getValue() << endl;
+        cerr << input_embedding_dimension.getDescription() << sep << input_embedding_dimension.getValue() << endl;
+        cerr << output_embedding_dimension.getDescription() << sep << output_embedding_dimension.getValue() << endl;
       }
       cerr << share_embeddings.getDescription() << sep << share_embeddings.getValue() << endl;
       if (share_embeddings.getValue() && input_embedding_dimension.getValue() != output_embedding_dimension.getValue())
       {
-	      cerr << "error: sharing input and output embeddings requires that input and output embeddings have same dimension" << endl;
-	      exit(1);
+        cerr << "error: sharing input and output embeddings requires that input and output embeddings have same dimension" << endl;
+        exit(1);
       }
 
       cerr << num_hidden.getDescription() << sep << num_hidden.getValue() << endl;
 
       if (string_to_activation_function(activation_function.getValue()) == InvalidFunction)
       {
-	      cerr << "error: invalid activation function: " << activation_function.getValue() << endl;
-	      exit(1);
+        cerr << "error: invalid activation function: " << activation_function.getValue() << endl;
+        exit(1);
       }
       cerr << activation_function.getDescription() << sep << activation_function.getValue() << endl;
 
       if (string_to_loss_function(loss_function.getValue()) == InvalidLoss)
       {
-	      cerr << "error: invalid loss function: " << loss_function.getValue() << endl;
-	      exit(1);
+        cerr << "error: invalid loss function: " << loss_function.getValue() << endl;
+        exit(1);
       }
       cerr << loss_function.getDescription() << sep << loss_function.getValue() << endl;
 
@@ -279,7 +277,7 @@ int main(int argc, char** argv)
       cerr << num_epochs.getDescription() << sep << num_epochs.getValue() << endl;
       cerr << minibatch_size.getDescription() << sep << minibatch_size.getValue() << endl;
       if (myParam.validation_file != "") {
-	     cerr << validation_minibatch_size.getDescription() << sep << validation_minibatch_size.getValue() << endl;
+       cerr << validation_minibatch_size.getDescription() << sep << validation_minibatch_size.getValue() << endl;
       }
       cerr << learning_rate.getDescription() << sep << learning_rate.getValue() << endl;
       cerr << L2_reg.getDescription() << sep << L2_reg.getValue() << endl;
@@ -288,7 +286,7 @@ int main(int argc, char** argv)
 
       cerr << normalization.getDescription() << sep << normalization.getValue() << endl;
       if (myParam.normalization){
-	      cerr << normalization_init.getDescription() << sep << normalization_init.getValue() << endl;
+        cerr << normalization_init.getDescription() << sep << normalization_init.getValue() << endl;
       }
 
       cerr << use_momentum.getDescription() << sep << use_momentum.getValue() << endl;
@@ -302,7 +300,7 @@ int main(int argc, char** argv)
 
       if (unigram_probs_file.getValue() != "")
       {
-	      cerr << "Note: --unigram_probs_file is deprecated and ignored." << endl;
+        cerr << "Note: --unigram_probs_file is deprecated and ignored." << endl;
       }
     }
     catch (TCLAP::ArgException &e)
@@ -337,7 +335,7 @@ int main(int argc, char** argv)
       training_data_flat_mmap = mmap_file.find<vec>("vector").first;
       cerr<<"Size of mmaped vector is "<<training_data_flat_mmap->size()<<endl;
       training_data_size = training_data_flat_mmap->size()/myParam.ngram_size;
-      //randomly shuffle the data for better learning. The shuffling will 
+      //randomly shuffle the data for better learning. The shuffling will
       //be different for a standard stl vector
       // Randomly shuffle training data to improve learning
       if (randomize == true) {
@@ -413,10 +411,10 @@ int main(int argc, char** argv)
     //cerr<<"Num tokens "<<num_tokens<<endl;
     //data_size_t training_data_size = num_tokens / myParam.ngram_size;
     cerr << "Number of training instances: "<< training_data_size << endl;
-    
+
     Matrix<int,Dynamic,Dynamic> training_data;
     //(training_data_flat.data(), myParam.ngram_size, training_data_size);
-    
+
     #ifdef MAP
     cerr<<"Setting up eigen map"<<endl;
     if (use_mmap_file == false) {
@@ -425,11 +423,11 @@ int main(int argc, char** argv)
       training_data = Map< Matrix<int,Dynamic,Dynamic> >(training_data_flat_mmap->data().get(), myParam.ngram_size, training_data_size);
     }
     cerr<<"Created eigen map"<<endl;
-    #else 
+    #else
     if (use_mmap_file == false) {
       training_data = Map< Matrix<int,Dynamic,Dynamic> >(training_data_flat.data(), myParam.ngram_size, training_data_size);
     }
-    #endif 
+    #endif
     // If neither --input_vocab_size nor --input_words_file is given, set input_vocab_size to the maximum word index
     if (myParam.input_vocab_size == 0 and myParam.input_words_file == "")
     {
@@ -454,7 +452,7 @@ int main(int argc, char** argv)
     // Read validation data
     vector<int> validation_data_flat;
     int validation_data_size = 0;
-    
+
     if (myParam.validation_file != "")
     {
       readDataFile(myParam.validation_file, myParam.ngram_size, validation_data_flat);
@@ -470,16 +468,16 @@ int main(int argc, char** argv)
     if (myParam.input_words_file != "")
     {
         readWordsFile(myParam.input_words_file, input_words);
-	if (myParam.input_vocab_size == 0)
-	    myParam.input_vocab_size = input_words.size();
+  if (myParam.input_vocab_size == 0)
+      myParam.input_vocab_size = input_words.size();
     }
 
     vector<string> output_words;
     if (myParam.output_words_file != "")
     {
         readWordsFile(myParam.output_words_file, output_words);
-	if (myParam.output_vocab_size == 0)
-	    myParam.output_vocab_size = output_words.size();
+  if (myParam.output_vocab_size == 0)
+      myParam.output_vocab_size = output_words.size();
     }
 
     ///// Construct unigram model and sampler that will be used for NCE
@@ -491,17 +489,17 @@ int main(int argc, char** argv)
         if (use_mmap_file == false) {
           output_word = training_data(myParam.ngram_size-1, train_id);
         } else {
-	      //cerr<<"mmap word is "<<training_data_flat_mmap->at((train_id+1)*myParam.ngram_size - 1)<<endl;
+        //cerr<<"mmap word is "<<training_data_flat_mmap->at((train_id+1)*myParam.ngram_size - 1)<<endl;
           output_word = training_data_flat_mmap->at((train_id+1)*myParam.ngram_size - 1);
         }
-		//cerr<<"output word is "<<output_word<<endl;
-	    unigram_counts[output_word] += 1;
+    //cerr<<"output word is "<<output_word<<endl;
+      unigram_counts[output_word] += 1;
     }
     multinomial<data_size_t> unigram (unigram_counts);
 
     ///// Create and initialize the neural network and associated propagators.
     model nn;
-    // IF THE MODEL FILE HAS BEEN DEFINED, THEN 
+    // IF THE MODEL FILE HAS BEEN DEFINED, THEN
     // LOAD THE NEURAL NETWORK MODEL
     if (myParam.model_file != ""){
       nn.read(myParam.model_file);
@@ -529,7 +527,7 @@ int main(int argc, char** argv)
     SoftmaxNCELoss<multinomial<data_size_t> > softmax_loss(unigram);
     // normalization parameters
     vector_map c_h, c_h_running_gradient;
-    
+
     ///////////////////////TRAINING THE NEURAL NETWORK////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////
 
@@ -540,8 +538,8 @@ int main(int argc, char** argv)
     if (validation_data_size > 0)
     {
         num_validation_batches = (validation_data_size-1)/myParam.validation_minibatch_size+1;
-	cerr<<"Number of validation minibatches: "<<num_validation_batches<<endl;
-    } 
+  cerr<<"Number of validation minibatches: "<<num_validation_batches<<endl;
+    }
 
     double current_momentum = myParam.initial_momentum;
     double momentum_delta = (myParam.final_momentum - myParam.initial_momentum)/(myParam.num_epochs-1);
@@ -568,36 +566,36 @@ int main(int argc, char** argv)
     }
 
     for (int epoch=0; epoch<myParam.num_epochs; epoch++)
-    { 
+    {
         cerr << "Epoch " << epoch+1 << endl;
         cerr << "Current learning rate: " << current_learning_rate << endl;
 
-        if (myParam.use_momentum) 
-	    cerr << "Current momentum: " << current_momentum << endl;
-	else
+        if (myParam.use_momentum)
+      cerr << "Current momentum: " << current_momentum << endl;
+  else
             current_momentum = -1;
 
-	cerr << "Training minibatches: ";
+  cerr << "Training minibatches: ";
 
-	double log_likelihood = 0.0;
+  double log_likelihood = 0.0;
 
-	int num_samples = 0;
-	if (loss_function == LogLoss)
-	    num_samples = output_vocab_size;
-	else if (loss_function == NCELoss)
-	    num_samples = 1+num_noise_samples;
+  int num_samples = 0;
+  if (loss_function == LogLoss)
+      num_samples = output_vocab_size;
+  else if (loss_function == NCELoss)
+      num_samples = 1+num_noise_samples;
 
-	Matrix<double,Dynamic,Dynamic> minibatch_weights(num_samples, minibatch_size);
-	Matrix<int,Dynamic,Dynamic> minibatch_samples(num_samples, minibatch_size);
-	Matrix<double,Dynamic,Dynamic> scores(num_samples, minibatch_size);
-	Matrix<double,Dynamic,Dynamic> probs(num_samples, minibatch_size);
+  Matrix<double,Dynamic,Dynamic> minibatch_weights(num_samples, minibatch_size);
+  Matrix<int,Dynamic,Dynamic> minibatch_samples(num_samples, minibatch_size);
+  Matrix<double,Dynamic,Dynamic> scores(num_samples, minibatch_size);
+  Matrix<double,Dynamic,Dynamic> probs(num_samples, minibatch_size);
 
         for(data_size_t batch=0;batch<num_batches;batch++)
         {
             if (batch > 0 && batch % 10000 == 0)
             {
-	        cerr << batch <<"...";
-            } 
+          cerr << batch <<"...";
+            }
 
             if (batch > 0 && batch % 500000 == 0)
             {
@@ -605,31 +603,31 @@ int main(int argc, char** argv)
                 compute_validation_perplexity(ngram_size, output_vocab_size, validation_minibatch_size, validation_data_size, num_validation_batches, myParam, prop_validation, validation_data, current_learning_rate, current_validation_ll);
                 cerr << "Current learning rate: " << current_learning_rate << endl;
             }
-   
+
             data_size_t minibatch_start_index = minibatch_size * batch;
 
       int current_minibatch_size = min(static_cast<data_size_t>(minibatch_size), training_data_size - minibatch_start_index);
       #ifdef MAP
-	    Matrix<int,Dynamic,Dynamic> minibatch = training_data.middleCols(minibatch_start_index, current_minibatch_size);
-      #else 
+      Matrix<int,Dynamic,Dynamic> minibatch = training_data.middleCols(minibatch_start_index, current_minibatch_size);
+      #else
       //ALTERNATIVE OPTION IF YOU'RE NOT USING eigen map interface on the mmapped file
-	    Matrix<int,Dynamic,Dynamic> minibatch;// = training_data.middleCols(minibatch_start_index, current_minibatch_size);
-		//cerr<<"Minibatch start index "<<minibatch_start_index<<endl;
-		//cerr<<"Minibatch size "<<current_minibatch_size<<endl;
+      Matrix<int,Dynamic,Dynamic> minibatch;// = training_data.middleCols(minibatch_start_index, current_minibatch_size);
+    //cerr<<"Minibatch start index "<<minibatch_start_index<<endl;
+    //cerr<<"Minibatch size "<<current_minibatch_size<<endl;
             if (use_mmap_file == true) {
             minibatch.setZero(ngram_size,current_minibatch_size);
             //now reading the ngrams from the mmaped file
               for (int k=0; k<ngram_size; k++){
                 for (data_size_t index = 0 ; index<current_minibatch_size; index++) {
-				  data_size_t current_index = index + minibatch_start_index;
-				  //cerr<<"the value in the mmap file "<<index<<" "<<k<<" is "<<training_data_flat_mmap->at(current_index*ngram_size+k)<<endl;
+          data_size_t current_index = index + minibatch_start_index;
+          //cerr<<"the value in the mmap file "<<index<<" "<<k<<" is "<<training_data_flat_mmap->at(current_index*ngram_size+k)<<endl;
                   minibatch(k,index) = training_data_flat_mmap->at(current_index*ngram_size+k);
                 }
               }
             } else {
               minibatch = training_data.middleCols(minibatch_start_index, current_minibatch_size);
             }
-      #endif 
+      #endif
             double adjusted_learning_rate = current_learning_rate/minibatch_size;
             //cerr<<"Adjusted learning rate: "<<adjusted_learning_rate<<endl;
 
@@ -648,20 +646,20 @@ int main(int argc, char** argv)
 
             prop.fProp(minibatch.topRows(ngram_size-1));
 
-	    if (loss_function == NCELoss)
-	    {
-	      ///// Noise-contrastive estimation
+      if (loss_function == NCELoss)
+      {
+        ///// Noise-contrastive estimation
 
-	      // Generate noise samples. Gather positive and negative samples into matrix.
+        // Generate noise samples. Gather positive and negative samples into matrix.
 
-	      start_timer(3);
+        start_timer(3);
 
         minibatch_samples.block(0, 0, 1, current_minibatch_size) = minibatch.bottomRows(1);
-        
+
         for (int sample_id = 1; sample_id < num_noise_samples+1; sample_id++)
             for (int train_id = 0; train_id < current_minibatch_size; train_id++)
                 minibatch_samples(sample_id, train_id) = unigram.sample(rng);
-          
+
         stop_timer(3);
 
         // Final forward propagation step (sparse)
@@ -686,7 +684,7 @@ int main(int argc, char** argv)
 
         double minibatch_log_likelihood;
         start_timer(5);
-        softmax_loss.fProp(scores.leftCols(current_minibatch_size), 
+        softmax_loss.fProp(scores.leftCols(current_minibatch_size),
                minibatch_samples,
                probs, minibatch_log_likelihood);
         stop_timer(5);
@@ -697,9 +695,9 @@ int main(int argc, char** argv)
         start_timer(6);
         softmax_loss.bProp(probs, minibatch_weights);
         stop_timer(6);
-        
+
         // Update the normalization parameters
-        
+
         if (myParam.normalization)
         {
           for (int train_id = 0;train_id < current_minibatch_size;train_id++)
@@ -711,19 +709,19 @@ int main(int argc, char** argv)
 
         // Be careful of short minibatch
         prop.bProp(minibatch.topRows(ngram_size-1),
-             minibatch_samples.leftCols(current_minibatch_size), 
+             minibatch_samples.leftCols(current_minibatch_size),
              minibatch_weights.leftCols(current_minibatch_size),
-             adjusted_learning_rate, 
+             adjusted_learning_rate,
              current_momentum,
              myParam.L2_reg,
              myParam.parameter_update,
              myParam.conditioning_constant,
              myParam.decay);
-	    }
-	    else if (loss_function == LogLoss)
-	    {
-	      ///// Standard log-likelihood
-	      start_timer(4);
+      }
+      else if (loss_function == LogLoss)
+      {
+        ///// Standard log-likelihood
+        start_timer(4);
         if (prop.skip_hidden)
             prop.output_layer_node.param->fProp(prop.first_hidden_activation_node.fProp_matrix, scores);
         else
@@ -732,21 +730,21 @@ int main(int argc, char** argv)
 
         double minibatch_log_likelihood;
         start_timer(5);
-        SoftmaxLogLoss().fProp(scores.leftCols(current_minibatch_size), 
-                   minibatch.row(ngram_size-1), 
-                   probs, 
+        SoftmaxLogLoss().fProp(scores.leftCols(current_minibatch_size),
+                   minibatch.row(ngram_size-1),
+                   probs,
                    minibatch_log_likelihood);
         stop_timer(5);
         log_likelihood += minibatch_log_likelihood;
 
         ///// Backward propagation
-        
+
         start_timer(6);
-        SoftmaxLogLoss().bProp(minibatch.row(ngram_size-1).leftCols(current_minibatch_size), 
-                   probs.leftCols(current_minibatch_size), 
+        SoftmaxLogLoss().bProp(minibatch.row(ngram_size-1).leftCols(current_minibatch_size),
+                   probs.leftCols(current_minibatch_size),
                    minibatch_weights);
         stop_timer(6);
-        
+
         prop.bProp(minibatch.topRows(ngram_size-1).leftCols(current_minibatch_size),
              minibatch_weights,
              adjusted_learning_rate,
@@ -757,33 +755,33 @@ int main(int argc, char** argv)
              myParam.decay);
           }
       }
-	cerr << "done." << endl;
+  cerr << "done." << endl;
 
-	if (loss_function == LogLoss)
-	{
-	    cerr << "Training log-likelihood: " << log_likelihood << endl;
+  if (loss_function == LogLoss)
+  {
+      cerr << "Training log-likelihood: " << log_likelihood << endl;
             cerr << "         perplexity:     "<< exp(-log_likelihood/training_data_size) << endl;
-	}
-	else if (loss_function == NCELoss)
-	    cerr << "Training NCE log-likelihood: " << log_likelihood << endl;
+  }
+  else if (loss_function == NCELoss)
+      cerr << "Training NCE log-likelihood: " << log_likelihood << endl;
 
         current_momentum += momentum_delta;
 
-	#ifdef USE_CHRONO
-	cerr << "Propagation times:";
-	for (int i=0; i<timer.size(); i++)
-	  cerr << " " << timer.get(i);
-	cerr << endl;
-	#endif
+  #ifdef USE_CHRONO
+  cerr << "Propagation times:";
+  for (int i=0; i<timer.size(); i++)
+    cerr << " " << timer.get(i);
+  cerr << endl;
+  #endif
 
-	if (myParam.model_prefix != "")
-	{
-	    cerr << "Writing model" << endl;
-	    if (myParam.input_words_file != "")
-	        nn.write(myParam.model_prefix + "." + lexical_cast<string>(epoch+1), input_words, output_words);
-	    else
-	        nn.write(myParam.model_prefix + "." + lexical_cast<string>(epoch+1));
-	}
+  if (myParam.model_prefix != "")
+  {
+      cerr << "Writing model" << endl;
+      if (myParam.input_words_file != "")
+          nn.write(myParam.model_prefix + "." + lexical_cast<string>(epoch+1), input_words, output_words);
+      else
+          nn.write(myParam.model_prefix + "." + lexical_cast<string>(epoch+1));
+  }
 
         if (epoch % 1 == 0 && validation_data_size > 0)
         {
@@ -793,4 +791,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
