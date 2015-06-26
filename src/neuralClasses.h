@@ -357,6 +357,26 @@ class Output_word_embeddings
   {
     UNCONST(DerivedOut, output, my_output);
     my_output = ((*W) * input).colwise() + b;
+    /* TODO: without EIGEN_NO_DEBUG - is this a bug?
+       ProductBase.h:102: Eigen::ProductBase<Derived, Lhs, Rhs>::ProductBase(const Lhs&
+       , const Rhs&) [with Derived = Eigen::GeneralProduct<Eigen::Matrix<double, -1, -1
+       , 1>, Eigen::Matrix<double, -1, -1>, 5>; Lhs = Eigen::Matrix<double, -1, -1, 1>;
+        Rhs = Eigen::Matrix<double, -1, -1>]: Assertion `a_lhs.cols() == a_rhs.rows() &
+       & "invalid matrix product" && "if you wanted a coeff-wise or a dot product use t
+       he respective explicit functions"' failed.
+
+       (gdb) p a_lhs.cols()
+       $3 = 50
+       (gdb) p	a_rhs.rows()
+       $4 = 100
+
+       (gdb) p a_lhs.rows()
+       $5 = 2
+       (gdb) p a_rhs.cols()
+       $6 = 1
+
+       from lookup_ngram normalization prop.skip_hidden in neuralNetwork.h:100
+    */
   }
 
   // Sparse output version
