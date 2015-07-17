@@ -15,7 +15,6 @@
 #include <boost/chrono.hpp>
 #endif
 
-//#include <../3rdparty/Eigen/Dense>
 #include <Eigen/Dense>
 
 #include "maybe_omp.h"
@@ -23,15 +22,15 @@
 // Make matrices hashable
 
 namespace Eigen {
-    template <typename Derived>
-    size_t hash_value(const DenseBase<Derived> &m)
-    {
-        size_t h=0;
-	for (int i=0; i<m.rows(); i++)
-	    for (int j=0; j<m.cols(); j++)
-	        boost::hash_combine(h, m(i,j));
-	return h;
-    }
+template <typename Derived>
+size_t hash_value(const DenseBase<Derived> &m)
+{
+  size_t h=0;
+  for (int i=0; i<m.rows(); i++)
+    for (int j=0; j<m.cols(); j++)
+      boost::hash_combine(h, m(i,j));
+  return h;
+}
 }
 
 namespace nplm
@@ -73,9 +72,9 @@ void readSentFile(const std::string &file, T &sentences)
 }
 
 inline void intgerize(std::vector<std::string> &ngram,std::vector<int> &int_ngram){
-        int ngram_size = ngram.size();
-        for (int i=0;i<ngram_size;i++)
-        int_ngram.push_back(boost::lexical_cast<int>(ngram[i]));
+  int ngram_size = ngram.size();
+  for (int i=0;i<ngram_size;i++)
+    int_ngram.push_back(boost::lexical_cast<int>(ngram[i]));
 }
 
 // Functions that take non-const matrices as arguments
@@ -85,194 +84,194 @@ inline void intgerize(std::vector<std::string> &ngram,std::vector<int> &int_ngra
 
 template <typename Derived>
 void initMatrix(boost::random::mt19937 &engine,
-		const Eigen::MatrixBase<Derived> &p_const,
-		bool init_normal, double range)
+                const Eigen::MatrixBase<Derived> &p_const,
+                bool init_normal, double range)
 {
-    UNCONST(Derived, p_const, p);
-    if (init_normal == 0)
-     // initialize with uniform distribution in [-range, range]
+  UNCONST(Derived, p_const, p);
+  if (init_normal == 0)
+    // initialize with uniform distribution in [-range, range]
+  {
+    boost::random::uniform_real_distribution<> unif_real(-range, range);
+    for (int i = 0; i < p.rows(); i++)
     {
-        boost::random::uniform_real_distribution<> unif_real(-range, range); 
-        for (int i = 0; i < p.rows(); i++)
-        {
-            for (int j = 0; j< p.cols(); j++)
-            {
-                p(i,j) = unif_real(engine);    
-            }
-        }
+      for (int j = 0; j< p.cols(); j++)
+      {
+        p(i,j) = unif_real(engine);
+      }
+    }
 
-    }
-    else 
-      // initialize with gaussian distribution with mean 0 and stdev range
+  }
+  else
+    // initialize with gaussian distribution with mean 0 and stdev range
+  {
+    boost::random::normal_distribution<double> unif_normal(0., range);
+    for (int i = 0; i < p.rows(); i++)
     {
-        boost::random::normal_distribution<double> unif_normal(0., range);
-        for (int i = 0; i < p.rows(); i++)
-        {
-            for (int j = 0; j < p.cols(); j++)
-            {
-                p(i,j) = unif_normal(engine);    
-            }
-        }
+      for (int j = 0; j < p.cols(); j++)
+      {
+        p(i,j) = unif_normal(engine);
+      }
     }
+  }
 }
 
 template <typename Derived>
 void initBias(boost::random::mt19937 &engine,
-		const Eigen::MatrixBase<Derived> &p_const,
-		bool init_normal, double range)
+              const Eigen::MatrixBase<Derived> &p_const,
+              bool init_normal, double range)
 {
-    UNCONST(Derived, p_const, p);
-    if (init_normal == 0)
-     // initialize with uniform distribution in [-range, range]
+  UNCONST(Derived, p_const, p);
+  if (init_normal == 0)
+    // initialize with uniform distribution in [-range, range]
+  {
+    boost::random::uniform_real_distribution<> unif_real(-range, range);
+    for (int i = 0; i < p.size(); i++)
     {
-        boost::random::uniform_real_distribution<> unif_real(-range, range); 
-        for (int i = 0; i < p.size(); i++)
-        {
-            p(i) = unif_real(engine);    
-        }
+      p(i) = unif_real(engine);
+    }
 
-    }
-    else 
-      // initialize with gaussian distribution with mean 0 and stdev range
+  }
+  else
+    // initialize with gaussian distribution with mean 0 and stdev range
+  {
+    boost::random::normal_distribution<double> unif_normal(0., range);
+    for (int i = 0; i < p.size(); i++)
     {
-        boost::random::normal_distribution<double> unif_normal(0., range);
-        for (int i = 0; i < p.size(); i++)
-        {
-            p(i) = unif_normal(engine);    
-        }
+      p(i) = unif_normal(engine);
     }
+  }
 }
 
 
 template <typename Derived>
 void readMatrix(std::ifstream &TRAININ, Eigen::MatrixBase<Derived> &param_const)
 {
-    UNCONST(Derived, param_const, param);
+  UNCONST(Derived, param_const, param);
 
-    int i = 0;
-    std::string line;
-    std::vector<std::string> fields;
-    
-    while (std::getline(TRAININ, line) && line != "")
+  int i = 0;
+  std::string line;
+  std::vector<std::string> fields;
+
+  while (std::getline(TRAININ, line) && line != "")
+  {
+    splitBySpace(line, fields);
+    if (fields.size() != param.cols())
     {
-        splitBySpace(line, fields);
-	if (fields.size() != param.cols())
-	{
-	    std::ostringstream err;
-	    err << "error: wrong number of columns (expected " << param.cols() << ", found " << fields.size() << ")";
-	    throw std::runtime_error(err.str());
-	}
-	
-	if (i >= param.rows())
-	{
-	    std::ostringstream err;
-	    err << "error: wrong number of rows (expected " << param.rows() << ", found " << i << ")";
-	    throw std::runtime_error(err.str());
-	}
-	
-	for (int j=0; j<fields.size(); j++)
-	{
-	    param(i,j) = boost::lexical_cast<typename Derived::Scalar>(fields[j]);
-	}
-	i++;
+      std::ostringstream err;
+      err << "error: wrong number of columns (expected " << param.cols() << ", found " << fields.size() << ")";
+      throw std::runtime_error(err.str());
     }
-    
-    if (i != param.rows())
+
+    if (i >= param.rows())
     {
-        std::ostringstream err;
-	err << "error: wrong number of rows (expected " << param.rows() << ", found more)";
-	throw std::runtime_error(err.str());
+      std::ostringstream err;
+      err << "error: wrong number of rows (expected " << param.rows() << ", found " << i << ")";
+      throw std::runtime_error(err.str());
     }
+
+    for (int j=0; j<fields.size(); j++)
+    {
+      param(i,j) = boost::lexical_cast<typename Derived::Scalar>(fields[j]);
+    }
+    i++;
+  }
+
+  if (i != param.rows())
+  {
+    std::ostringstream err;
+    err << "error: wrong number of rows (expected " << param.rows() << ", found more)";
+    throw std::runtime_error(err.str());
+  }
 }
 
 template <typename Derived>
 void readMatrix(const std::string &param_file, const Eigen::MatrixBase<Derived> &param_const)
 {
-    UNCONST(Derived, param_const, param);
-    std::cerr << "Reading data from file: " << param_file << std::endl;
-    
-    std::ifstream TRAININ(param_file.c_str());
-    if (!TRAININ)
-    {
-        std::cerr << "Error: can't read training data from file " << param_file << std::endl;
-	exit(-1);
-    }
-    readMatrix(TRAININ, param);
-    TRAININ.close();
+  UNCONST(Derived, param_const, param);
+  std::cerr << "Reading data from file: " << param_file << std::endl;
+
+  std::ifstream TRAININ(param_file.c_str());
+  if (!TRAININ)
+  {
+    std::cerr << "Error: can't read training data from file " << param_file << std::endl;
+    exit(-1);
+  }
+  readMatrix(TRAININ, param);
+  TRAININ.close();
 }
 
 template <typename Derived>
 void writeMatrix(const Eigen::MatrixBase<Derived> &param, const std::string &filename)
 {
-    std::cerr << "Writing parameters to " << filename << std::endl;
+  std::cerr << "Writing parameters to " << filename << std::endl;
 
-    std::ofstream OUT;
-    OUT.precision(16);
-    OUT.open(filename.c_str());
-    if (! OUT)
-    {
-      std::cerr << "Error: can't write to file " << filename<< std::endl;
-      exit(-1);
-    }
-    writeMatrix(param, OUT);
-    OUT.close();
+  std::ofstream OUT;
+  OUT.precision(16);
+  OUT.open(filename.c_str());
+  if (! OUT)
+  {
+    std::cerr << "Error: can't write to file " << filename<< std::endl;
+    exit(-1);
+  }
+  writeMatrix(param, OUT);
+  OUT.close();
 }
 
 template <typename Derived>
 void writeMatrix(const Eigen::MatrixBase<Derived> &param, std::ofstream &OUT)
 {
-    for (int row = 0;row < param.rows();row++)
+  for (int row = 0;row < param.rows();row++)
+  {
+    int col;
+    for (col = 0;col < param.cols()-1;col++)
     {
-        int col;
-        for (col = 0;col < param.cols()-1;col++)
-        {
-            OUT<<param(row,col)<<"\t";
-        }
-        //dont want an extra tab at the end
-        OUT<<param(row,col)<<std::endl;
+      OUT<<param(row,col)<<"\t";
     }
+    //dont want an extra tab at the end
+    OUT<<param(row,col)<<std::endl;
+  }
 }
 
 template <typename Derived>
 double logsum(const Eigen::MatrixBase<Derived> &v)
 {
-    int mi; 
-    double m = v.maxCoeff(&mi);
-    double logz = 0.0;
-    for (int i=0; i<v.rows(); i++)
-        if (i != mi)
-	    logz += std::exp(v(i) - m);
-    logz = log1p(logz) + m;
-    return logz;
+  int mi;
+  double m = v.maxCoeff(&mi);
+  double logz = 0.0;
+  for (int i=0; i<v.rows(); i++)
+    if (i != mi)
+      logz += std::exp(v(i) - m);
+  logz = log1p(logz) + m;
+  return logz;
 }
 
 double logadd(double x, double y);
 
 #ifdef USE_CHRONO
-class Timer 
+class Timer
 {
-    typedef boost::chrono::high_resolution_clock clock_type;
-    typedef clock_type::time_point time_type;
-    typedef clock_type::duration duration_type;
-    std::vector<time_type> m_start;
-    std::vector<duration_type> m_total;
-public:
-    Timer() { }
-    Timer(int n) { resize(n); }
-    void resize(int n) { m_start.resize(n); m_total.resize(n); }
-    int size() const { return m_start.size(); }
-    void start(int i);
-    void stop(int i);
-    void reset(int i);
-    double get(int i) const;
+  typedef boost::chrono::high_resolution_clock clock_type;
+  typedef clock_type::time_point time_type;
+  typedef clock_type::duration duration_type;
+  std::vector<time_type> m_start;
+  std::vector<duration_type> m_total;
+ public:
+  Timer() { }
+  Timer(int n) { resize(n); }
+  void resize(int n) { m_start.resize(n); m_total.resize(n); }
+  int size() const { return m_start.size(); }
+  void start(int i);
+  void stop(int i);
+  void reset(int i);
+  double get(int i) const;
 };
 
 extern Timer timer;
 #define start_timer(x) timer.start(x)
 #define stop_timer(x) timer.stop(x)
 #else
-#define start_timer(x) 0
-#define stop_timer(x) 0
+#define start_timer(x) (void)0
+#define stop_timer(x) (void)0
 #endif
 
 int setup_threads(int n_threads);

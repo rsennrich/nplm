@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <string>
-//#include <../3rdparty/Eigen/Dense>
 #include <Eigen/Dense>
 
 #include "util.h"
@@ -19,28 +18,28 @@ enum activation_function_type { Tanh, HardTanh, Rectifier, Identity, InvalidFunc
 
 inline activation_function_type string_to_activation_function (const std::string &s)
 {
-    if (s == "identity")
-        return Identity;
-    else if (s == "rectifier")
-        return Rectifier;
-    else if (s == "tanh")
-        return Tanh;
-    else if (s == "hardtanh")
-        return HardTanh;
-    else
-        return InvalidFunction;
+  if (s == "identity")
+    return Identity;
+  else if (s == "rectifier")
+    return Rectifier;
+  else if (s == "tanh")
+    return Tanh;
+  else if (s == "hardtanh")
+    return HardTanh;
+  else
+    return InvalidFunction;
 }
 
 inline std::string activation_function_to_string (activation_function_type f)
 {
-    if (f == Identity)
-        return "identity";
-    else if (f == Rectifier)
-        return "rectifier";
-    else if (f == Tanh)
-        return "tanh";
-    else if (f == HardTanh)
-        return "hardtanh";
+  if (f == Identity)
+    return "identity";
+  else if (f == Rectifier)
+    return "rectifier";
+  else if (f == Tanh)
+    return "tanh";
+  else if (f == HardTanh)
+    return "hardtanh";
 }
 
 struct hardtanh_functor {
@@ -69,51 +68,53 @@ struct drectifier_functor {
 
 class Activation_function
 {
-        int size;
-	activation_function_type f;
+  int size;
+  activation_function_type f;
 
-    public:
-        Activation_function() : size(0), f(Rectifier) { }
+ public:
+  Activation_function() : size(0), f(Rectifier) { }
 
-	void resize(int size) { this->size = size; }
-	void set_activation_function(activation_function_type f) { this->f = f; }
+  void resize(int size) { this->size = size; }
+  void set_activation_function(activation_function_type f) { this->f = f; }
 
-	template <typename Engine>
-	void initialize(Engine &engine, bool init_normal, double init_range) { }
+  template <typename Engine>
+  void initialize(Engine &engine, bool init_normal, double init_range) { }
 
-	int n_inputs () const { return size; }
-	int n_outputs () const { return size; }
+  int n_inputs () const { return size; }
+  int n_outputs () const { return size; }
 
-        template <typename DerivedIn, typename DerivedOut>
-	void fProp(const MatrixBase<DerivedIn> &input, const MatrixBase<DerivedOut> &output) const
-        {
-	    UNCONST(DerivedOut, output, my_output);
+  template <typename DerivedIn, typename DerivedOut>
+  void fProp(const MatrixBase<DerivedIn> &input, const MatrixBase<DerivedOut> &output) const
+  {
+    UNCONST(DerivedOut, output, my_output);
 
-	    switch (f)
-	    {
-	    case Identity: my_output = input; break;
-	    case Rectifier: my_output = input.unaryExpr(rectifier_functor()); break;
-	    case Tanh: my_output = input.unaryExpr(tanh_functor()); break;
-	    case HardTanh: my_output = input.unaryExpr(hardtanh_functor()); break;
-	    }
-        }
+    switch (f)
+    {
+      case Identity: my_output = input; break;
+      case Rectifier: my_output = input.unaryExpr(rectifier_functor()); break;
+      case Tanh: my_output = input.unaryExpr(tanh_functor()); break;
+      case HardTanh: my_output = input.unaryExpr(hardtanh_functor()); break;
+      case InvalidFunction: std::abort();
+    }
+  }
 
-        template <typename DerivedGOut, typename DerivedGIn, typename DerivedIn, typename DerivedOut>
-	void bProp(const MatrixBase<DerivedGOut> &input, 
-      MatrixBase<DerivedGIn> &output,
-		   const MatrixBase<DerivedIn> &finput,
-       const MatrixBase<DerivedOut> &foutput) const
-        {
-	    UNCONST(DerivedGIn, output, my_output);
+  template <typename DerivedGOut, typename DerivedGIn, typename DerivedIn, typename DerivedOut>
+  void bProp(const MatrixBase<DerivedGOut> &input,
+             MatrixBase<DerivedGIn> &output,
+             const MatrixBase<DerivedIn> &finput,
+             const MatrixBase<DerivedOut> &foutput) const
+  {
+    UNCONST(DerivedGIn, output, my_output);
 
-	    switch (f)
-	    {
-	    case Identity: my_output = input; break;
-	    case Rectifier: my_output = finput.array().unaryExpr(drectifier_functor()) * input.array(); break;
-	    case Tanh: my_output = foutput.array().unaryExpr(tanh_functor()) * input.array(); break;
-	    case HardTanh: my_output = finput.array().unaryExpr(hardtanh_functor()) * input.array(); break;
-	    }
-        }
+    switch (f)
+    {
+      case Identity: my_output = input; break;
+      case Rectifier: my_output = finput.array().unaryExpr(drectifier_functor()) * input.array(); break;
+      case Tanh: my_output = foutput.array().unaryExpr(tanh_functor()) * input.array(); break;
+      case HardTanh: my_output = finput.array().unaryExpr(hardtanh_functor()) * input.array(); break;
+      case InvalidFunction: std::abort();
+    }
+  }
 };
 
 } // namespace nplm

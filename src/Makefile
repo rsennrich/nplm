@@ -1,12 +1,12 @@
 ### Compilation options.
 
 # C++ compiler. Tested with g++ and Intel icpc.
-CXX=/usr/bin/g++
+CXX=g++
 #CXX=icpc
 
 # Compiler options. Note that -DEIGEN_NO_DEBUG is essential for good performance!
 #CFLAGS=-g
-CFLAGS=-O3 -DEIGEN_NO_DEBUG -DNDEBUG 
+CFLAGS=-O3 -DEIGEN_NO_DEBUG -DNDEBUG  $(CXXFLAGS)
 
 # Architecture. Set to x86_64 or i686 to override.
 ARCH:=$(shell uname -m)
